@@ -18,6 +18,11 @@ export const loadDevices = cache((): Promise<Device[]> =>
   withFallback('devices', async () => (await selectAll('devices', 'id,name,category,type,mem_gb,bw_gbs,fp16_tflops,fp8,fp4,backend,usable_frac,source,verified',
     q => q.order('verified', { ascending: false }).order('name'))).map(toDevice), () => SAMPLE_DEVICES, true));
 
+/** `devices.aliases` per device id (only devices that have aliases). Not part of the Device contract. */
+export const loadDeviceAliases = cache((): Promise<{ id: string; aliases: string[] }[]> =>
+  withFallback('devices.aliases', async () => (await selectAll('devices', 'id,aliases', q => q.neq('aliases', '{}')))
+    .map(r => ({ id: String(r.id), aliases: (r.aliases as string[] | null) ?? [] })), () => []));
+
 /** v_run_stats: median / IQR of shared runs per device × file × runtime (rows without a device or file are skipped). */
 export const loadRunStats = cache((): Promise<RunStat[]> =>
   withFallback('v_run_stats', async () => (await selectAll('v_run_stats')).filter(r => r.device_id != null && r.file_id != null).map((r): RunStat => ({

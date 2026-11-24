@@ -2,5 +2,5 @@
 // Server Components / route handlers only. Every loader is React-cache()d per request.
 export { loadModels, loadCreators, toModelRow, type Creator } from './models';
 export { loadFiles, toFileRow } from './files';
-export { loadDevices, loadRunStats, loadEta, toDevice } from './hardware';
+export { loadDevices, loadDeviceAliases, loadRunStats, loadEta, toDevice } from './hardware';
 export { loadCalibrations, loadSourceStatus } from './meta';

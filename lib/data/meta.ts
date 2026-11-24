@@ -15,4 +15,4 @@ export const loadCalibrations = cache((): Promise<Calibration[]> =>
 export const loadSourceStatus = cache((): Promise<SourceStatus[]> =>
   withFallback('v_source_status', async () => (await selectAll('v_source_status')).map((r): SourceStatus => ({
     source: String(r.source), finishedAt: String(r.finished_at), ok: !!r.ok, error: str(r.error),
-  })), () => SAMPLE_SOURCE_STATUS, true));
+  })), () => SAMPLE_SOURCE_STATUS)); // empty view = nothing synced yet; don't show fake sync times

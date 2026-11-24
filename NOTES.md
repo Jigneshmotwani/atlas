@@ -31,7 +31,12 @@ Server Components / route handlers only (`import 'server-only'`). Each loader re
 | `loadEta()` | `EtaCalibration[]` | `eta_calibrations` |
 | `loadSourceStatus()` | `SourceStatus[]` | `v_source_status` |
 
-Also `toModelRow`, `toFileRow`, `toDevice` row mappers. Supabase clients: `supabaseServer()` (publishable key, reads),
+Also `loadDeviceAliases()` → `{ id, aliases }[]` (aliases are not in the Device contract) and `toModelRow`, `toFileRow`, `toDevice` row mappers.
+`loadSourceStatus()` returns `[]` when nothing has synced yet (UI shows "not synced yet").
+
+### Trigram matching: `lib/trigram.ts` (W1)
+`similarity(a, b)` (same result as Postgres `pg_trgm` `similarity`), `bestSimilarity(q, names)`, `rankBySimilarity(q, items, namesOf, { min, limit })`.
+Use it for every "trigram ≥ x" rule in SPEC (model matching 0.92, device resolution 0.8, Ask AI candidate devices) instead of Postgres RPCs. Supabase clients: `supabaseServer()` (publishable key, reads),
 `supabaseAdmin()` (secret key, writes; reads `SUPABASE_URL ?? NEXT_PUBLIC_SUPABASE_URL`), `hasSupabase()` in `lib/supabase/server.ts`;
 `supabaseBrowser()` in `lib/supabase/browser.ts`. `lib/supabase/server.ts` has no `server-only` import so tsx scripts can use it; never import it from a client file.
 
