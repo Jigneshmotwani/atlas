@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Prototype</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%230b1220%22/%3E%3Cg%20transform%3D%22translate%286%206%29%20scale%28.8125%29%22%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2225%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.5%22/%3E%3Cpath%20d%3D%22M44%2011.22L41.75%2015.11M52.78%2020L48.89%2022.25M52.78%2044L48.89%2041.75M44%2052.78L41.75%2048.89M20%2052.78L22.25%2048.89M11.22%2044L15.11%2041.75M11.22%2020L15.11%2022.25M20%2011.22L22.25%2015.11%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.6%22/%3E%3Cpath%20d%3D%22M32%203V22M32%2042V61M3%2032H22M42%2032H61%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M32%2023Q32%2032%2041%2032Q32%2032%2032%2041Q32%2032%2023%2032Q32%2032%2032%2023Z%22%20fill%3D%22%23F47321%22/%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22%23B4D7CD%22/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.1"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif'],serif:['"Instrument Serif"','Georgia','serif']},colors:{bg:'var(--bg)',card:'var(--card)',soft:'var(--soft)',ink:'var(--ink)',mute:'var(--mute)',line:'var(--line)',acc:'var(--acc)',butter:'var(--butter)',mint:'var(--mint)',steel:'var(--steel)',night:'var(--night)',onacc:'var(--onacc)',warn:'var(--warn)'}}}}
+</script>
+<style>
+/* VOICE confident studio product: dark starry hero, calm white working sheets
+   IDEA an observatory for models: a night sky you map, then precise instruments below
+   PICTURE starfield hero fading to steel blue, crystal icons, live tables and the quant scatter
+   COLOUR night #0b1220 → steel #8EA8C3 hero; white cards; orange #F47321 actions; butter #FFEEB3, mint #B4D7CD highlights
+   TYPE Inter 600/800 for UI + Instrument Serif italic for big numbers and section names
+   LAYOUT header + hero band, content sheet overlaps the fade; tools: controls then result; phone stacks */
+:root{color-scheme:light dark;
+ --bg:light-dark(#eef2f6,#0a101b);--card:light-dark(#ffffff,#111a28);--soft:light-dark(#f5f7fa,#0e1624);
+ --ink:light-dark(#0f1726,#eef2f8);--mute:light-dark(#566275,#9fadc0);--line:light-dark(#e1e6ee,#223047);
+ --acc:#F47321;--butter:#FFEEB3;--mint:#B4D7CD;--steel:#8EA8C3;--night:#0b1220;--onacc:#0f1726;--warn:light-dark(#b2470a,#ffa36b);
+ --fade:light-dark(#8EA8C3,#1a2b48)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.serif{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+.scroll{overflow-x:auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:10px}
+.hero{background:radial-gradient(900px 420px at 50% -8%,#1e3566 0%,transparent 65%),linear-gradient(180deg,#0b1220 0%,#0e1a33 52%,#243f72 80%,var(--fade) 100%)}
+.after{background:linear-gradient(180deg,var(--fade) 0,var(--bg) 340px)}
+.tw{animation:tw 3.2s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.fade{animation:fade .4s cubic-bezier(.2,.8,.2,1) both}@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.slide{animation:slide .45s cubic-bezier(.2,.8,.2,1) both}@keyframes slide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+.pop{animation:pop .45s cubic-bezier(.34,1.56,.64,1) both}@keyframes pop{0%{transform:scale(.6);opacity:.2}100%{transform:scale(1);opacity:1}}
+.bar{transform-origin:left;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.trk{transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.gem{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}.lift:hover .gem{transform:translateY(-4px) rotate(-8deg) scale(1.08)}
+.arr{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}.lift:hover .arr{transform:translate(3px,-3px)}
+.ico path,.ico circle,.ico rect,.ico line,.ico polyline{stroke-dasharray:80;stroke-dashoffset:0}
+.ico.on path,.ico.on circle,.ico.on rect,.ico.on line,.ico.on polyline{animation:draw .7s ease-out}@keyframes draw{from{stroke-dashoffset:80}}
+.pick{transition:transform .35s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s}.pick:hover{transform:translateY(-2px)}
+.dot{animation:dot 1s ease-in-out infinite}@keyframes dot{0%,100%{opacity:.3;transform:none}50%{opacity:1;transform:translateY(-4px)}}
+.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tw,.fade,.slide,.pop,.bar,.ico.on *,.dot,.spin{animation:none!important}.trk,.gem,.arr,.pick{transition:none}}
+table{border-collapse:collapse}
+/* scrollbars: thin steel pill, orange when you reach for it */
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--steel) 80%,transparent) transparent}
+.scroll:hover,ul:hover,textarea:hover,.overflow-y-auto:hover{scrollbar-color:var(--acc) transparent}
+html{scrollbar-color:color-mix(in srgb,var(--steel) 85%,transparent) var(--bg)}
+@supports not (scrollbar-color:auto){
+ ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
+ ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--steel) 80%,transparent);border-radius:999px;border:3px solid transparent;background-clip:padding-box}
+ ::-webkit-scrollbar-thumb:hover{background:var(--acc);background-clip:padding-box}::-webkit-scrollbar-corner{background:transparent}}
+.nobar{scrollbar-width:none}.nobar::-webkit-scrollbar{display:none}
+.edge{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent)}
+.ticks{transform-origin:32px 32px;transition:transform .8s cubic-bezier(.34,1.56,.64,1)}.logo:hover .ticks{transform:rotate(30deg)}.logo:hover .star{transform:scale(1.25)}.star{transform-origin:32px 32px;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.ticks,.star{transition:none}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:7px 6px!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+{
+const {useState,useMemo,useEffect,useRef}=React;
+
+/* ================= DATA (flat numbers, as stored in Supabase; sample values) ================= */
+const SOURCES=[{k:'aa_index',name:'Artificial Analysis',synced:'3h ago'},{k:'arena_elo',name:'Arena',synced:'5h ago'},{k:'livebench',name:'LiveBench',synced:'1d ago'},{k:'epoch_eci',name:'Epoch AI',synced:'2d ago'}];
+const RAW=[
+ {id:'opus55',name:'Claude Opus 5.5',creator:'Anthropic',open:0,reasoning:1,in_mod:'text,image,file',out_mod:'text',ctx_k:1000,price_in:4,price_out:20,tps:114,ttft:2.4,task_in_tok:42000,task_out_tok:9000,aa_index:59.1,arena_elo:1498,livebench:81.2,epoch_eci:161,coding:96,agentic:95,cyber:93,math:90,long_ctx:92},
+ {id:'gpt6a',name:'GPT-6 Astra',creator:'OpenAI',open:0,reasoning:1,in_mod:'text,image,audio,file',out_mod:'text,image',ctx_k:400,price_in:3.5,price_out:18,tps:96,ttft:3.1,task_in_tok:40000,task_out_tok:11000,aa_index:56.9,arena_elo:1505,livebench:80.1,epoch_eci:158,coding:92,agentic:91,cyber:90,math:97,long_ctx:88},
+ {id:'gem35',name:'Gemini 3.5 Pro',creator:'Google',open:0,reasoning:1,in_mod:'text,image,audio,video,file',out_mod:'text,audio',ctx_k:2000,price_in:2,price_out:12,tps:142,ttft:2.0,task_in_tok:41000,task_out_tok:10000,aa_index:54.2,arena_elo:1489,livebench:77.9,epoch_eci:null,coding:88,agentic:86,cyber:84,math:93,long_ctx:98},
+ {id:'son55',name:'Claude Sonnet 5.5',creator:'Anthropic',open:0,reasoning:1,in_mod:'text,image,file',out_mod:'text',ctx_k:1000,price_in:2,price_out:10,tps:168,ttft:1.4,task_in_tok:38000,task_out_tok:8000,aa_index:52.8,arena_elo:1470,livebench:76.0,epoch_eci:149,coding:91,agentic:90,cyber:87,math:82,long_ctx:88},
+ {id:'hai55',name:'Claude Haiku 5.5',creator:'Anthropic',open:0,reasoning:0,in_mod:'text,image',out_mod:'text',ctx_k:400,price_in:0.6,price_out:3,tps:260,ttft:0.6,task_in_tok:36000,task_out_tok:5000,aa_index:41.0,arena_elo:1402,livebench:63.5,epoch_eci:null,coding:74,agentic:72,cyber:68,math:62,long_ctx:70},
+ {id:'kimi25',name:'Kimi K2.5',creator:'Moonshot AI',open:1,reasoning:1,in_mod:'text,image',out_mod:'text',ctx_k:256,price_in:0.6,price_out:2.5,tps:58,ttft:1.9,task_in_tok:44000,task_out_tok:14000,aa_index:47.3,arena_elo:1441,livebench:71.8,epoch_eci:141,coding:84,agentic:88,cyber:78,math:80,long_ctx:78,total_b:1000,active_b:32,kv_kb:70},
+ {id:'ds41f',name:'DeepSeek-V4.1-Flash',creator:'DeepSeek',open:1,reasoning:1,in_mod:'text',out_mod:'text',ctx_k:160,price_in:0.27,price_out:1.1,tps:74,ttft:1.2,task_in_tok:43000,task_out_tok:12000,aa_index:45.1,arena_elo:1430,livebench:70.2,epoch_eci:null,coding:81,agentic:79,cyber:76,math:86,long_ctx:74,total_b:284,active_b:13,kv_kb:36},
+ {id:'q38fn',name:'Qwen3.8-Flash-Next',creator:'Alibaba',open:1,reasoning:1,in_mod:'text,image,video',out_mod:'text',ctx_k:262,price_in:0.15,price_out:0.9,tps:190,ttft:0.7,task_in_tok:42000,task_out_tok:13000,aa_index:42.6,arena_elo:1418,livebench:67.4,epoch_eci:133,coding:77,agentic:80,cyber:71,math:79,long_ctx:82,total_b:80,active_b:3,kv_kb:24},
+ {id:'q3827',name:'Qwen3.8-27B',creator:'Alibaba',open:1,reasoning:1,in_mod:'text,image',out_mod:'text',ctx_k:262,price_in:0.1,price_out:0.6,tps:88,ttft:0.6,task_in_tok:40000,task_out_tok:12000,aa_index:40.2,arena_elo:1405,livebench:65.0,epoch_eci:null,coding:75,agentic:73,cyber:66,math:78,long_ctx:72,total_b:27,active_b:27,kv_kb:64},
+ {id:'gem4',name:'Gemma 4 26B',creator:'Google',open:1,reasoning:0,in_mod:'text,image,audio',out_mod:'text',ctx_k:128,price_in:0.08,price_out:0.35,tps:120,ttft:0.5,task_in_tok:36000,task_out_tok:6000,aa_index:35.4,arena_elo:1388,livebench:60.1,epoch_eci:null,coding:66,agentic:64,cyber:58,math:70,long_ctx:66,total_b:26,active_b:26,kv_kb:48},
+];
+// one row per HF file: [repo, quant, bits/weight, GB, KLD vs BF16 (null = not measured), format, kind]
+const V=(r,q,b,g,k,f='gguf',kind='quant')=>({repo:r,up:r.split('/')[0],q,bits:b,gb:g,kld:k,fmt:f,kind});
+const VARIANTS={
+ kimi25:[V('moonshotai/Kimi-K2.5','INT4 native',4.5,595,0,'int4','official'),V('unsloth/Kimi-K2.5-GGUF','UD-Q2_K_XL',2.7,375,0.11),V('unsloth/Kimi-K2.5-GGUF','UD-TQ1_0',1.8,240,0.29),V('bartowski/Kimi-K2.5-GGUF','IQ2_XXS',2.1,290,0.21),V('example-user/Kimi-K2.5-abliterated-GGUF','Q2_K',2.6,360,null,'gguf','abliterated')],
+ ds41f:[V('deepseek-ai/DeepSeek-V4.1-Flash','FP8',8,290,0,'fp8','official'),V('unsloth/DeepSeek-V4.1-Flash-GGUF','UD-Q4_K_XL',4.6,168,0.03),V('unsloth/DeepSeek-V4.1-Flash-GGUF','UD-Q2_K_XL',2.7,99,0.12),V('bartowski/DeepSeek-V4.1-Flash-GGUF','Q4_K_M',4.8,172,0.035),V('bartowski/DeepSeek-V4.1-Flash-GGUF','IQ3_M',3.6,128,0.07)],
+ q38fn:[V('Qwen/Qwen3.8-Flash-Next','BF16',16,160,0,'bf16','official'),
+  V('unsloth/Qwen3.8-Flash-Next-GGUF','UD-Q2_K_XL',2.9,30,0.10),V('unsloth/Qwen3.8-Flash-Next-GGUF','UD-Q3_K_XL',3.8,38,0.05),V('unsloth/Qwen3.8-Flash-Next-GGUF','UD-Q4_K_XL',4.6,47,0.02),V('unsloth/Qwen3.8-Flash-Next-GGUF','UD-Q8_K_XL',8.5,86,0.004),
+  V('bartowski/Qwen_Qwen3.8-Flash-Next-GGUF','Q3_K_M',3.9,39,0.062),V('bartowski/Qwen_Qwen3.8-Flash-Next-GGUF','Q4_K_M',4.8,48.5,0.025),V('bartowski/Qwen_Qwen3.8-Flash-Next-GGUF','Q6_K',6.6,66,0.007),
+  V('ggml-org/Qwen3.8-Flash-Next-GGUF','Q4_K_M',4.8,48.5,0.031),V('ggml-org/Qwen3.8-Flash-Next-GGUF','Q8_0',8.5,85,0.0045),
+  V('example-user/Qwen3.8-Flash-Next-coder-ft','Q4_K_M',4.8,48,null,'gguf','finetune')],
+ q3827:[V('Qwen/Qwen3.8-27B','BF16',16,54,0,'bf16','official'),
+  V('unsloth/Qwen3.8-27B-GGUF','UD-Q2_K_XL',2.9,9.8,0.09),V('unsloth/Qwen3.8-27B-GGUF','UD-Q3_K_XL',3.7,12.6,0.045),V('unsloth/Qwen3.8-27B-GGUF','UD-Q4_K_XL',4.8,17,0.02),V('unsloth/Qwen3.8-27B-GGUF','UD-Q5_K_XL',5.7,19.6,0.009),V('unsloth/Qwen3.8-27B-GGUF','UD-Q6_K_XL',6.8,23,0.004),V('unsloth/Qwen3.8-27B-GGUF','Q8_0',8.5,28.7,0.001),
+  V('bartowski/Qwen_Qwen3.8-27B-GGUF','Q2_K',3.1,10.5,0.12),V('bartowski/Qwen_Qwen3.8-27B-GGUF','IQ3_M',3.6,12.1,0.052),V('bartowski/Qwen_Qwen3.8-27B-GGUF','Q4_K_M',4.9,16.5,0.024),V('bartowski/Qwen_Qwen3.8-27B-GGUF','Q5_K_M',5.7,19.2,0.011),V('bartowski/Qwen_Qwen3.8-27B-GGUF','Q6_K',6.6,22.2,0.005),V('bartowski/Qwen_Qwen3.8-27B-GGUF','Q8_0',8.5,28.7,0.001),
+  V('lmstudio-community/Qwen3.8-27B-GGUF','Q3_K_L',4.3,14.5,0.06),V('lmstudio-community/Qwen3.8-27B-GGUF','Q4_K_M',4.9,16.5,0.028),V('lmstudio-community/Qwen3.8-27B-GGUF','Q6_K',6.6,22.2,0.006),
+  V('mradermacher/Qwen3.8-27B-i1-GGUF','i1-IQ2_M',2.8,9.4,0.14),V('mradermacher/Qwen3.8-27B-i1-GGUF','i1-IQ3_S',3.6,12,0.058),V('mradermacher/Qwen3.8-27B-i1-GGUF','i1-Q4_K_M',4.9,16.5,0.023),V('mradermacher/Qwen3.8-27B-i1-GGUF','i1-Q5_K_M',5.7,19.2,0.01),
+  V('ggml-org/Qwen3.8-27B-GGUF','Q4_K_M',4.9,16.5,0.03),V('ggml-org/Qwen3.8-27B-GGUF','Q8_0',8.5,28.7,0.0013)],
+ gem4:[V('google/gemma-4-26b-it','BF16',16,52,0,'bf16','official'),V('google/gemma-4-26b-it-qat-q4_0-gguf','QAT Q4_0',4.5,15,0.01),V('unsloth/gemma-4-26b-it-GGUF','UD-Q4_K_XL',4.8,16,0.018),V('bartowski/google_gemma-4-26b-it-GGUF','Q4_K_M',4.9,16.2,0.022)],
+};
+// crowdsourced runs from `atlas-probe --share` (sample): device, model, quant, uploader, runtime, gen tok/s, prompt tok/s, runs
+const MEASURED=[
+ ['spark','q38fn','UD-Q4_K_XL','unsloth','llama.cpp',58,2100,14],['spark','q3827','UD-Q4_K_XL','unsloth','llama.cpp',9.6,640,9],['spark','q3827','Q8_0','unsloth','llama.cpp',6.1,610,4],
+ ['spark','ds41f','UD-Q2_K_XL','unsloth','llama.cpp',24,880,4],['spark','gem4','QAT Q4_0','google','llama.cpp',11.8,700,6],
+ ['r4090','q3827','Q4_K_M','bartowski','llama.cpp',41,2900,23],['r4090','q3827','UD-Q4_K_XL','unsloth','llama.cpp',39,2850,17],['r4090','gem4','QAT Q4_0','google','llama.cpp',46,3500,11],
+ ['r5090','q3827','UD-Q5_K_XL','unsloth','llama.cpp',55,4800,8],['r5090','q3827','UD-Q4_K_XL','unsloth','llama.cpp',61,5100,12],
+ ['mbp128','q38fn','UD-Q4_K_XL','unsloth','MLX',72,900,6],['mbp128','q3827','UD-Q4_K_XL','unsloth','llama.cpp',18,310,5],
+ ['stu512','kimi25','UD-TQ1_0','unsloth','llama.cpp',17,120,5],['stu512','ds41f','UD-Q4_K_XL','unsloth','llama.cpp',27,190,3],
+].map(([dev,m,q,up,rt,tg,pp,runs])=>({dev,m,q,up,rt,tg,pp,runs}));
+const RUNS=MEASURED.reduce((a,x)=>a+x.runs,0);
+
+const MODELS=(()=>{
+ const norm={};SOURCES.forEach(s=>{const v=RAW.map(m=>m[s.k]).filter(x=>x!=null);norm[s.k]=[Math.min(...v),Math.max(...v)]});
+ return RAW.map(m=>{
+  const src=SOURCES.filter(s=>m[s.k]!=null).map(s=>{const [a,b]=norm[s.k];return {...s,raw:m[s.k],n:Math.round(50+50*(m[s.k]-a)/(b-a||1))}});
+  const intel=Math.round(src.reduce((a,x)=>a+x.n,0)/src.length);
+  return {...m,inp:m.in_mod.split(','),out:m.out_mod.split(','),src,intel,spread:Math.max(...src.map(x=>x.n))-Math.min(...src.map(x=>x.n)),
+   cost_task:(m.task_in_tok*m.price_in+m.task_out_tok*m.price_out)/1e6,time_task:m.ttft+m.task_out_tok/m.tps,blend:(3*m.price_in+m.price_out)/4,variants:VARIANTS[m.id]||[]};
+ });
+})();
+const NVAR=MODELS.reduce((a,m)=>a+m.variants.length,0);
+const PROVIDERS=['OpenAI','Anthropic','Google','Meta','Mistral','DeepSeek','Alibaba','Moonshot AI','xAI','Microsoft','NVIDIA','Amazon','Cohere','AI21 Labs','IBM','Zhipu AI','MiniMax','Baidu','Tencent','ByteDance','StepFun','01.AI','LG AI Research','Upstage','Reka','Liquid AI','Ai2','Nous Research','Perplexity','Snowflake','Databricks','ServiceNow','Salesforce','Apple','Xiaomi','Meituan','Kuaishou','Sarvam AI','TII','Stability AI','Inception','Arcee AI','Deep Cogito','Swiss AI','Kakao','Naver','Prime Intellect','Essential AI'];
+const DEF_PROV=PROVIDERS.slice(0,12);
+// device catalog sample: t gpu = card in a host PC, unified = whole shared-memory system. mem GB, bw GB/s, tf FP16 TFLOPS (approx)
+const DEVICES=[
+ {id:'spark',name:'NVIDIA DGX Spark',cat:'AI box',t:'unified',mem:128,bw:273,tf:125,fp8:1,be:'cuda'},
+ {id:'aimax',name:'AMD Ryzen AI Max+ 395 (128GB)',cat:'AI box',t:'unified',mem:128,bw:256,tf:59,fp8:0,be:'rocm'},
+ {id:'orin',name:'NVIDIA Jetson AGX Orin 64GB',cat:'AI box',t:'unified',mem:64,bw:205,tf:21,fp8:0,be:'cuda'},
+ {id:'mini24',name:'Mac mini M4 Pro 24GB',cat:'Mac',t:'unified',mem:24,bw:273,tf:17,fp8:0,be:'metal'},
+ {id:'mini64',name:'Mac mini M4 Pro 64GB',cat:'Mac',t:'unified',mem:64,bw:273,tf:17,fp8:0,be:'metal'},
+ {id:'mbp128',name:'MacBook Pro M4 Max 128GB',cat:'Mac',t:'unified',mem:128,bw:546,tf:34,fp8:0,be:'metal'},
+ {id:'stu128',name:'Mac Studio M4 Max 128GB',cat:'Mac',t:'unified',mem:128,bw:546,tf:34,fp8:0,be:'metal'},
+ {id:'stu512',name:'Mac Studio M3 Ultra 512GB',cat:'Mac',t:'unified',mem:512,bw:819,tf:57,fp8:0,be:'metal'},
+ {id:'r3090',name:'GeForce RTX 3090',cat:'GPU',t:'gpu',mem:24,bw:936,tf:71,fp8:0,be:'cuda'},
+ {id:'r4060t',name:'GeForce RTX 4060 Ti 16GB',cat:'GPU',t:'gpu',mem:16,bw:288,tf:44,fp8:1,be:'cuda'},
+ {id:'r4090',name:'GeForce RTX 4090',cat:'GPU',t:'gpu',mem:24,bw:1008,tf:165,fp8:1,be:'cuda'},
+ {id:'r5080',name:'GeForce RTX 5080',cat:'GPU',t:'gpu',mem:16,bw:960,tf:113,fp8:1,be:'cuda'},
+ {id:'r5090',name:'GeForce RTX 5090',cat:'GPU',t:'gpu',mem:32,bw:1792,tf:209,fp8:1,be:'cuda'},
+ {id:'xtx',name:'Radeon RX 7900 XTX',cat:'GPU',t:'gpu',mem:24,bw:960,tf:123,fp8:0,be:'rocm'},
+ {id:'a6k',name:'RTX 6000 Ada 48GB',cat:'Workstation GPU',t:'gpu',mem:48,bw:960,tf:364,fp8:1,be:'cuda'},
+ {id:'p6k',name:'RTX PRO 6000 Blackwell 96GB',cat:'Workstation GPU',t:'gpu',mem:96,bw:1792,tf:500,fp8:1,be:'cuda'},
+ {id:'l40s',name:'L40S 48GB',cat:'Data center',t:'gpu',mem:48,bw:864,tf:362,fp8:1,be:'cuda'},
+ {id:'a100',name:'A100 80GB',cat:'Data center',t:'gpu',mem:80,bw:2039,tf:312,fp8:0,be:'cuda'},
+ {id:'h100',name:'H100 80GB SXM',cat:'Data center',t:'gpu',mem:80,bw:3350,tf:989,fp8:1,be:'cuda'},
+ {id:'r4090l',name:'RTX 4090 Laptop 16GB',cat:'Laptop GPU',t:'gpu',mem:16,bw:576,tf:80,fp8:1,be:'cuda'},
+];
+const CATS=[...new Set(DEVICES.map(d=>d.cat))];
+
+/* ================= ENGINE ================= */
+const BLANK={arch:'discrete',gpus:1,vram:24,gbw:1000,link:'pcie',ram:64,rbw:90,tf:100,fp8:true,be:'cuda',disk:1000,dspd:5};
+function specFromPicks(picks,host){
+ const items=DEVICES.filter(d=>picks[d.id]>0).map(d=>({...d,qty:picks[d.id]}));
+ if(!items.length)return null;
+ const uni=items.filter(d=>d.t==='unified'),gpu=items.filter(d=>d.t==='gpu');const n=items.reduce((a,d)=>a+d.qty,0);
+ const devId=items.length===1?items[0].id:null;
+ if(!gpu.length){const big=[...uni].sort((x,y)=>y.mem-x.mem)[0];
+  return {arch:'unified',gpus:n,vram:0,gbw:Math.min(...uni.map(d=>d.bw)),link:n>1?'network':'none',ram:uni.reduce((a,d)=>a+d.mem*d.qty,0),rbw:Math.min(...uni.map(d=>d.bw)),tf:uni.reduce((a,d)=>a+d.tf*d.qty,0),fp8:uni.every(d=>d.fp8),be:uni[0].be,disk:host.disk,dspd:host.dspd,devId,single:{mem:big.mem*0.85,bw:big.bw,tf:big.tf}}}
+ const big=[...gpu].sort((x,y)=>y.mem-x.mem)[0],cnt=gpu.reduce((a,d)=>a+d.qty,0);
+ return {arch:'discrete',gpus:cnt,vram:gpu.reduce((a,d)=>a+d.mem*d.qty,0)/cnt,gbw:Math.min(...gpu.map(d=>d.bw)),link:uni.length?'network':'pcie',ram:host.ram+uni.reduce((a,d)=>a+d.mem*d.qty,0),rbw:host.rbw,tf:gpu.reduce((a,d)=>a+d.tf*d.qty,0),fp8:gpu.every(d=>d.fp8),be:gpu[0].be,disk:host.disk,dspd:host.dspd,devId,single:{mem:big.mem*0.92,bw:big.bw,tf:big.tf}};
+}
+const fastMem=s=>!s?0:s.arch==='unified'?s.ram*0.85:s.arch==='cpu'?0:s.vram*s.gpus*0.92;
+function runOn(m,v,s,ctxK){
+ const kv=m.kv_kb*ctxK*1000/1048576,need=v.gb*1.05+kv+1.5,gmem=fastMem(s),cmem=s.arch!=='unified'?Math.max(0,s.ram*0.8-4):0;
+ const res={need:Math.round(need),load:Math.round(v.gb/Math.max(0.1,s.dspd)),disk:v.gb<=s.disk};
+ if(v.fmt!=='gguf'){if(s.arch==='cpu'||s.be==='cpu')return {...res,where:'no',why:'Needs a GPU runtime (vLLM / MLX)'};if(v.fmt==='fp8'&&!s.fp8)return {...res,where:'no',why:'Needs FP8 support'};if(v.fmt==='int4'&&s.be==='metal')return {...res,where:'no',why:'Format not supported on Mac'}}
+ let where;if(s.arch!=='cpu'&&need<=gmem)where='gpu';else if(v.fmt==='gguf'&&need<=gmem+cmem)where=s.arch==='cpu'?'cpu':'offload';
+ else return {...res,where:'no',why:v.fmt!=='gguf'&&need<=gmem+cmem?`Needs ${Math.round(need)} GB of GPU memory; this format can't spill into RAM`:`Needs ${Math.round(need)} GB, has ${Math.round(gmem+cmem)} GB`};
+ const one=s.single||(s.arch==='unified'?{mem:gmem/s.gpus,bw:s.gbw,tf:s.tf/s.gpus}:{mem:s.vram*0.92,bw:s.gbw,tf:s.tf/s.gpus});
+ const solo=where==='gpu'&&s.gpus>1&&need<=one.mem;
+ const bpt=m.active_b*v.bits/8,frac=where==='gpu'?0:where==='cpu'?1:(need-gmem)/need;
+ const eff=s.gpus>1&&!solo?(s.link==='nvlink'?0.55:s.link==='network'?0.35:0.45):0.6,gbw=solo?one.bw:s.gbw;
+ const t=(bpt*(1-frac))/(Math.max(1,gbw)*eff)+(bpt*frac)/(Math.max(1,s.rbw)*0.6);
+ // MoE routing and Metal kernels land further below the bandwidth ceiling
+ const tps=Math.max(0.1,(1/t)*(m.active_b<m.total_b?0.7:1)*(s.be==='metal'?0.8:1));
+ const rt=v.fmt==='gguf'?(s.be==='metal'&&where==='gpu'?'llama.cpp or MLX':'llama.cpp'):(s.be==='metal'?'MLX':'vLLM / SGLang');
+ return {...res,where,solo,rt,tps:+tps.toFixed(1),lo:Math.max(0.1,+(tps*0.7).toFixed(1)),hi:+(tps*1.15).toFixed(1),prefill:Math.round((where==='cpu'?2:solo?one.tf:s.tf)*1e12*0.3/(2*m.active_b*1e9)),why:''};
+}
+const measured=(m,v,s)=>s&&s.devId?MEASURED.find(x=>x.dev===s.devId&&x.m===m.id&&x.q===v.q&&x.up===v.up):null;
+// best variant: near-lossless (KLD ≤ 0.01) and smallest if one fits fast memory, else lowest-loss that runs
+function bestRun(m,s,ctx){const fs=m.variants.filter(v=>v.kld!=null).map(v=>({v,...runOn(m,v,s,ctx)}));const rk={gpu:0,offload:1,cpu:1,no:2};
+ const g=fs.filter(f=>f.where==='gpu'),nl=g.filter(f=>f.v.kld<=0.01).sort((a,b)=>a.v.gb-b.v.gb);
+ const best=nl[0]||[...g].sort((a,b)=>a.v.kld-b.v.kld)[0]||[...fs].filter(f=>f.where!=='no').sort((a,b)=>rk[a.where]-rk[b.where]||a.v.kld-b.v.kld)[0]||[...fs].sort((a,b)=>a.v.gb-b.v.gb)[0];return {fs,best}}
+
+/* ================= ICONS ================= */
+const Ico=({n,on,size=20})=>{const p={fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round'};
+ const d={check:<path d="M5 12.5l4.5 4.5L19 7" {...p}/>,x:<path d="M6 6l12 12M18 6L6 18" {...p}/>,back:<path d="M15 5l-7 7 7 7" {...p}/>,
+  info:<><circle cx="12" cy="12" r="9" {...p}/><path d="M12 11v5M12 8h.01" {...p}/></>,search:<><circle cx="11" cy="11" r="7" {...p}/><path d="M20 20l-4-4" {...p}/></>,
+  arrow:<path d="M7 17L17 7M9 7h8v8" {...p}/>,spark:<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" {...p}/>,
+  chev:<path d="M6 9l6 6 6-6" {...p}/>,send:<path d="M5 12h14M13 6l6 6-6 6" {...p}/>,term:<><polyline points="4 17 9 12 4 7" {...p}/><line x1="12" y1="18" x2="20" y2="18" {...p}/></>}[n];
+ return <svg className={`ico ${on?'on':''}`} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">{d}</svg>};
+// crystal icons, one shape per section
+const Gem=({k,size=40})=>{const id='g'+k;const shapes={
+  explorer:<><path d="M20 3l14 8v18l-14 8-14-8V11z" fill={`url(#${id})`}/><path d="M20 3v16l14-8M20 19L6 11M20 19v18" stroke="#fff" strokeOpacity=".55" strokeWidth="1.2" fill="none"/></>,
+  recommend:<><path d="M20 2l5 13 13 5-13 5-5 13-5-13-13-5 13-5z" fill={`url(#${id})`}/><path d="M20 2v36M2 20h36" stroke="#fff" strokeOpacity=".45" strokeWidth="1.2"/></>,
+  hardware:<><rect x="7" y="7" width="26" height="26" rx="6" fill={`url(#${id})`}/><rect x="14" y="14" width="12" height="12" rx="2.5" fill="#fff" fillOpacity=".55"/><path d="M14 3v4M20 3v4M26 3v4M14 33v4M20 33v4M26 33v4M3 14h4M3 20h4M3 26h4M33 14h4M33 20h4M33 26h4" stroke={`url(#${id})`} strokeWidth="2.4" strokeLinecap="round"/></>,
+  quants:<><path d="M6 30l8-14 6 8 6-14 8 20z" fill={`url(#${id})`}/><circle cx="14" cy="16" r="3" fill="#fff"/><circle cx="26" cy="10" r="3" fill="#fff"/><path d="M4 34h32" stroke={`url(#${id})`} strokeWidth="2.4" strokeLinecap="round"/></>,
+  probe:<><path d="M20 4a16 16 0 1 1 0 32 16 16 0 0 1 0-32z" fill={`url(#${id})`}/><path d="M20 20L29 11" stroke="#fff" strokeWidth="2.6" strokeLinecap="round"/><circle cx="20" cy="20" r="3" fill="#fff"/></>};
+ return <svg className="gem" width={size} height={size} viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#B4D7CD"/><stop offset=".55" stopColor="#8EA8C3"/><stop offset="1" stopColor="#F47321"/></linearGradient></defs>{shapes[k]}</svg>};
+
+const Reticle=({size=30})=><svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="25" fill="none" stroke="currentColor" strokeWidth="3.5"/><path className="ticks" d="M44 11.22L41.75 15.11M52.78 20L48.89 22.25M52.78 44L48.89 41.75M44 52.78L41.75 48.89M20 52.78L22.25 48.89M11.22 44L15.11 41.75M11.22 20L15.11 22.25M20 11.22L22.25 15.11" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" opacity=".6"/><path d="M32 3V22M32 42V61M3 32H22M42 32H61" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round"/><path className="star" d="M32 23Q32 32 41 32Q32 32 32 41Q32 32 23 32Q32 32 32 23Z" fill="#F47321"/><circle cx="44" cy="20" r="2.6" fill="#B4D7CD"/></svg>;
+const Wordmark=({size=30})=><span className="logo flex items-center gap-2.5"><Reticle size={size}/><span className="font-light tracking-[.32em] text-[17px]">ATLAS</span></span>;
+
+/* ================= PRIMITIVES ================= */
+const Card=({children,className='',...p})=><div {...p} className={`rounded-[22px] bg-card border border-line ${className}`}>{children}</div>;
+const Pill=({children,onClick,dark,small,acc,...p})=><button onClick={onClick} {...p} className={`lift group inline-flex items-center gap-2 rounded-full ${small?'h-10 pl-4 pr-1.5':'h-12 pl-5 pr-1.5'} text-xs font-bold uppercase tracking-[.06em] border transition-colors disabled:opacity-40 ${acc?'bg-acc text-onacc border-acc':dark?'border-white/30 text-white hover:bg-white/10':'border-line bg-card hover:border-ink'}`}>{children}<span className={`arr grid place-items-center rounded-full ${small?'h-7 w-7':'h-9 w-9'} ${acc?'bg-onacc text-white':dark?'bg-white text-night':'bg-ink text-bg'}`}><Ico n="arrow" size={16}/></span></button>;
+const Chip=({on,children,...p})=><button {...p} aria-pressed={!!on} className={`h-10 px-4 rounded-full border text-sm font-semibold transition-colors ${on?'bg-ink text-bg border-ink':'border-line bg-card hover:border-ink'}`}>{children}</button>;
+const Tag=({children,tone})=><span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap ${tone==='butter'?'bg-butter text-onacc':tone==='mint'?'bg-mint text-onacc':tone==='acc'?'bg-acc text-onacc':tone==='warn'?'text-warn border border-current':'border border-line text-mute'}`}>{children}</span>;
+const WHERE={gpu:['All in fast memory','mint'],offload:['Spills into RAM','butter'],cpu:['CPU only','butter'],no:["Won't run",'']};
+const Where=({w})=><Tag tone={WHERE[w][1]}>{w==='no'?<Ico n="x" size={12}/>:<Ico n="check" size={12} on/>}{WHERE[w][0]}</Tag>;
+const fmt$=n=>n<0.01?'$'+n.toFixed(4):n<1?'$'+n.toFixed(3):'$'+n.toFixed(2);
+const fmtS=s=>s<60?s.toFixed(0)+'s':Math.floor(s/60)+'m '+String(Math.round(s%60)).padStart(2,'0')+'s';
+const ctxL=k=>k>=1000?k/1000+'M':k+'K';
+const Head=({title,right})=><div className="flex flex-wrap items-end justify-between gap-3"><h2 className="text-[clamp(24px,3vw,34px)] font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">{title}</h2>{right}</div>;
+const Th=({children,r})=><th className={`p-3 font-semibold text-xs text-mute ${r?'text-right':'text-left'}`}>{children}</th>;
+const TableBox=({children})=><div className="scroll rounded-2xl border border-line"><table className="w-full text-sm">{children}</table></div>;
+function Speed({r,meas}){if(!r||r.where==='no')return <span className="text-mute">–</span>;
+ return meas?<div className="text-right"><div className="num font-bold">{meas.tg} tok/s</div><div className="text-xs mt-0.5"><Tag tone="mint">measured · {meas.runs} runs</Tag></div></div>
+ :<div className="text-right"><div className="num font-semibold">{r.lo}–{r.hi} tok/s</div><div className="text-xs text-mute">estimate</div></div>}
+
+function ProviderSelect({value,onChange}){
+ const [o,setO]=useState(false);const [q,setQ]=useState('');const ref=useRef(null);
+ useEffect(()=>{if(!o)return;const c=e=>{if(ref.current&&!ref.current.contains(e.target))setO(false)};const k=e=>{if(e.key==='Escape')setO(false)};addEventListener('pointerdown',c);addEventListener('keydown',k);return()=>{removeEventListener('pointerdown',c);removeEventListener('keydown',k)}},[o]);
+ const list=PROVIDERS.filter(p=>p.toLowerCase().includes(q.toLowerCase()));const n=p=>MODELS.filter(m=>m.creator===p).length;
+ return <div className="relative" ref={ref}>
+  <button aria-haspopup="true" aria-expanded={o} onClick={()=>setO(!o)} className="h-10 pl-4 pr-3 rounded-full border border-line bg-card text-sm font-semibold flex items-center gap-2">Providers <span className="num rounded-full bg-butter px-2 text-xs font-bold text-onacc">{value.length} of {PROVIDERS.length}</span><span style={{transition:'transform .3s',transform:o?'rotate(180deg)':'none'}}><Ico n="chev" size={14}/></span></button>
+  {o&&<div className="fade absolute left-0 z-30 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-line bg-card p-2 shadow-[0_18px_40px_rgba(11,18,32,.18)]">
+   <label htmlFor="pq" className="sr-only">Search providers</label><input id="pq" autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search providers" className="h-10 w-full rounded-xl border border-line bg-bg px-3 text-sm"/>
+   <div className="flex gap-3 px-1 py-2 text-xs font-bold">{[['All',PROVIDERS],['None',[]],['Default',DEF_PROV]].map(([l,v])=><button key={l} onClick={()=>onChange(v)} className="h-8 underline underline-offset-4 decoration-[#F47321] decoration-2">{l}</button>)}</div>
+   <ul className="max-h-72 overflow-y-auto">{list.map(p=><li key={p}><label className="flex items-center gap-2.5 h-10 px-2 rounded-xl hover:bg-soft cursor-pointer"><input type="checkbox" checked={value.includes(p)} onChange={()=>onChange(value.includes(p)?value.filter(x=>x!==p):[...value,p])} className="h-4 w-4 accent-[#F47321]"/><span className="text-sm flex-1">{p}</span>{n(p)>0&&<span className="text-xs text-mute num">{n(p)}</span>}</label></li>)}
+    {!list.length&&<li className="p-3 text-sm text-mute">No provider found</li>}</ul></div>}
+ </div>;
+}
+
+/* ================= EXPLORER ================= */
+const METRICS=[{k:'intel',l:'Intelligence',fmt:v=>v,hi:1},{k:'coding',l:'Coding',fmt:v=>v,hi:1},{k:'agentic',l:'Agentic',fmt:v=>v,hi:1},{k:'cyber',l:'Cybersecurity',fmt:v=>v,hi:1},{k:'math',l:'Math',fmt:v=>v,hi:1},{k:'long_ctx',l:'Long context',fmt:v=>v,hi:1},{k:'cost_task',l:'Cost per task',fmt:fmt$,hi:0},{k:'time_task',l:'Time per task',fmt:fmtS,hi:0},{k:'tps',l:'Output speed',fmt:v=>v+' tok/s',hi:1},{k:'blend',l:'Price per 1M',fmt:fmt$,hi:0}];
+function Explorer({open}){
+ const [mk,setMk]=useState('intel');const [q,setQ]=useState('');const [f,setF]=useState({w:'any',r:'any',cr:DEF_PROV,inp:[],ctx:0});
+ const M=METRICS.find(x=>x.k===mk);
+ const rows=useMemo(()=>MODELS.filter(m=>(m.name+m.creator).toLowerCase().includes(q.toLowerCase())&&(f.w==='any'||(f.w==='open')==!!m.open)&&(f.r==='any'||(f.r==='yes')==!!m.reasoning)&&f.cr.includes(m.creator)&&f.inp.every(x=>m.inp.includes(x))&&m.ctx_k>=f.ctx).sort((a,b)=>M.hi?b[mk]-a[mk]:a[mk]-b[mk]),[mk,q,f]);
+ const max=Math.max(...rows.map(r=>r[mk]),1);const sel='h-10 rounded-full border border-line bg-card pl-4 pr-8 text-sm font-semibold';
+ return <div className="space-y-5">
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{[['Models tracked',MODELS.length],['Open-weight files on Hugging Face',NVAR],['Measured speed runs',RUNS],['Benchmark sources averaged',SOURCES.length]].map(([l,v],i)=><Card key={l} className="fade p-4 sm:p-5 flex items-end justify-between gap-3" style={{animationDelay:i*70+'ms'}}><span className="text-xs sm:text-sm text-mute leading-snug max-w-[9rem]">{l}</span><span className="serif text-[clamp(40px,5vw,60px)] leading-none num">{v}</span></Card>)}</div>
+  <Card className="p-4 sm:p-6">
+   <Head title={rows[0]?`${rows[0].name} leads on ${M.l.toLowerCase()}`:'No models match these filters'}/>
+   <div className="scroll nobar edge mt-5 -mx-1 px-1"><div className="flex gap-1.5 w-max p-1 rounded-full bg-soft border border-line" role="tablist" aria-label="Metric">{METRICS.map(x=><button key={x.k} role="tab" aria-selected={mk===x.k} onClick={()=>setMk(x.k)} className={`h-9 px-4 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${mk===x.k?'bg-ink text-bg':'hover:bg-card'}`}>{x.l}</button>)}</div></div>
+   <div className="flex flex-wrap gap-2 mt-4 items-center">
+    <div className="relative w-full sm:w-56"><span className="absolute left-3.5 top-3 text-mute"><Ico n="search" size={16}/></span><label htmlFor="q" className="sr-only">Search models</label><input id="q" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search models" className="h-10 pl-10 pr-3 rounded-full border border-line bg-card w-full"/></div>
+    <select aria-label="Weights" value={f.w} onChange={e=>setF({...f,w:e.target.value})} className={sel}><option value="any">All weights</option><option value="open">Open weights</option><option value="closed">Closed</option></select>
+    <select aria-label="Reasoning" value={f.r} onChange={e=>setF({...f,r:e.target.value})} className={sel}><option value="any">Reasoning: any</option><option value="yes">Reasoning</option><option value="no">Non-reasoning</option></select>
+    <select aria-label="Minimum context" value={f.ctx} onChange={e=>setF({...f,ctx:+e.target.value})} className={sel}>{[[0,'Any context'],[128,'≥128K'],[256,'≥256K'],[1000,'≥1M']].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
+    <ProviderSelect value={f.cr} onChange={v=>setF({...f,cr:v})}/>
+    {['image','audio','video'].map(x=><Chip key={x} on={f.inp.includes(x)} onClick={()=>setF(s=>({...s,inp:s.inp.includes(x)?s.inp.filter(y=>y!==x):[...s.inp,x]}))}>{x} in</Chip>)}
+   </div>
+   <div key={mk+rows.length} className="mt-6 space-y-2">{rows.map((m,i)=><button key={m.id} onClick={()=>open(m)} className="w-full grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)_5rem] sm:grid-cols-[13rem_minmax(0,1fr)_6rem] gap-3 items-center text-left group">
+    <span className="text-sm font-semibold truncate group-hover:underline">{m.name}</span>
+    <span className="h-6 rounded-full bg-soft overflow-hidden"><span className="bar block h-full rounded-full" style={{width:(100*m[mk]/max)+'%',background:i===0?'var(--acc)':m.open?'var(--mint)':'var(--steel)',animationDelay:i*40+'ms'}}/></span>
+    <span className="num text-sm font-bold text-right">{M.fmt(m[mk])}</span></button>)}</div>
+   <div className="flex flex-wrap gap-4 mt-4 text-xs text-mute font-semibold"><span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-steel"/>Closed</span><span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-mint"/>Open weights</span><span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-acc"/>Leader</span><span className="ml-auto">{M.hi?'Higher is better':'Lower is better'}</span></div>
+  </Card>
+  <Card className="p-2 sm:p-3"><TableBox><thead className="bg-soft"><tr><Th>#</Th><Th>Model</Th>{mk==='intel'?SOURCES.map(s=><Th key={s.k} r>{s.name}</Th>):<Th r>{M.l}</Th>}<Th r>{mk==='intel'?'Average':'Intelligence'}</Th><Th r>Cost / task</Th><Th r>Time / task</Th><Th r>Context</Th></tr></thead>
+   <tbody>{rows.map((m,i)=><tr key={m.id} className="border-t border-line hover:bg-soft"><td className="p-3 num text-mute">{i+1}</td><td className="p-3"><button onClick={()=>open(m)} className="font-semibold hover:underline text-left">{m.name}</button><div className="text-xs text-mute">{m.creator}{m.open?' · open':''}{m.reasoning?' · reasoning':''}</div></td>
+    {mk==='intel'?SOURCES.map(s=><td key={s.k} className="p-3 text-right num">{m[s.k]??<span className="text-mute">–</span>}</td>):<td className="p-3 text-right num font-bold">{M.fmt(m[mk])}</td>}
+    <td className="p-3 text-right num font-bold">{m.intel}</td><td className="p-3 text-right num">{fmt$(m.cost_task)}</td><td className="p-3 text-right num">{fmtS(m.time_task)}</td><td className="p-3 text-right num">{ctxL(m.ctx_k)}</td></tr>)}</tbody></TableBox>
+   <p className="text-xs text-mute p-3">Average = each source rescaled to 50–100 across models, then averaged. Sources that haven't tested a model are skipped.</p></Card>
+ </div>;
+}
+
+/* ================= DETAIL DRAWER ================= */
+function Detail({m,close,spec,toQuants}){
+ useEffect(()=>{const k=e=>e.key==='Escape'&&close();addEventListener('keydown',k);return()=>removeEventListener('keydown',k)},[]);
+ const ups=[...new Set(m.variants.filter(v=>v.kind==='quant').map(v=>v.up))];
+ const show=[...m.variants.filter(v=>v.kind!=='quant'),...ups.map(u=>m.variants.filter(v=>v.up===u&&v.kind==='quant').sort((a,b)=>Math.abs(a.bits-4.8)-Math.abs(b.bits-4.8))[0])];
+ return <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={m.name}>
+  <button aria-label="Close" className="absolute inset-0 bg-[#0b1220]/50" onClick={close}/>
+  <div className="slide relative w-full max-w-xl h-full overflow-y-auto bg-bg p-5 sm:p-7">
+   <div className="flex justify-between gap-3"><div><div className="text-sm text-mute">{m.creator}</div><h2 className="text-3xl font-semibold tracking-tight">{m.name}</h2></div><button onClick={close} aria-label="Close" className="h-11 w-11 grid place-items-center rounded-full border border-line bg-card"><Ico n="x"/></button></div>
+   <div className="grid grid-cols-3 gap-2 mt-5">{[['Intelligence',m.intel],['Cost / task',fmt$(m.cost_task)],['Time / task',fmtS(m.time_task)]].map(([l,v])=><Card key={l} className="p-3"><div className="text-xs text-mute">{l}</div><div className="serif text-4xl num pop">{v}</div></Card>)}</div>
+   <h3 className="font-semibold mt-7">Intelligence by source</h3>
+   <Card className="mt-2 p-1"><table className="w-full text-sm"><thead><tr><Th>Source</Th><Th r>Raw</Th><Th r>Rescaled</Th><Th r>Synced</Th></tr></thead>
+    <tbody>{m.src.map(s=><tr key={s.k} className="border-t border-line"><td className="p-3 font-semibold">{s.name}</td><td className="p-3 text-right num">{s.raw}</td><td className="p-3 text-right num font-bold">{s.n}</td><td className="p-3 text-right text-mute">{s.synced}</td></tr>)}
+     <tr className="border-t-2 border-ink"><td className="p-3 font-bold">Average</td><td/><td className="p-3 text-right num font-bold">{m.intel}</td><td className="p-3 text-right text-xs text-mute">spread {m.spread}</td></tr></tbody></table></Card>
+   {SOURCES.filter(s=>m[s.k]==null).map(s=><p key={s.k} className="text-xs text-mute mt-1">{s.name}: not tested, left out of the average</p>)}
+   <dl className="grid grid-cols-2 gap-x-6 text-sm mt-6">{[['Coding',m.coding],['Agentic',m.agentic],['Cybersecurity',m.cyber],['Math',m.math],['Long context',m.long_ctx],['Context window',ctxL(m.ctx_k)],['Price in / out',`$${m.price_in} / $${m.price_out}`],['Speed',m.tps+' tok/s'],['Input',m.inp.join(', ')],['Output',m.out.join(', ')]].map(([k,v])=><div key={k} className="flex justify-between border-b border-line py-2"><dt className="text-mute">{k}</dt><dd className="num font-semibold">{v}</dd></div>)}</dl>
+   {m.open?<><div className="flex items-center justify-between mt-7"><h3 className="font-semibold">Files on Hugging Face</h3>{ups.length>1&&<Pill small onClick={()=>toQuants(m.id)}>Compare {m.variants.filter(v=>v.kind==='quant').length} quants</Pill>}</div>
+    <p className="text-sm text-mute mt-1">{spec?'Checked against your hardware at 32K context.':'Set up your hardware to see what runs.'}</p>
+    <div className="mt-3 space-y-2">{show.map(v=>{const r=spec&&runOn(m,v,spec,32),me=measured(m,v,spec);return <Card key={v.repo+v.q} className="p-3.5">
+     <div className="flex flex-wrap justify-between gap-2"><div><div className="font-semibold text-sm break-all">{v.repo}</div><div className="text-xs text-mute num">{v.q} · {v.bits} bits · {v.gb} GB</div></div>{r&&<Where w={r.where}/>}</div>
+     <div className="flex flex-wrap gap-1.5 mt-2">{v.kind!=='quant'&&<Tag tone={v.kind==='abliterated'?'warn':''}>{v.kind}</Tag>}{v.kld===0?<Tag>reference</Tag>:v.kld==null?<Tag tone="warn">no quality data</Tag>:<Tag>KLD {v.kld}{v.kld<=0.01?' · near-lossless':v.kld<0.05?' · small loss':' · noticeable loss'}</Tag>}
+      {me?<Tag tone="mint">{me.tg} tok/s measured</Tag>:r&&r.where!=='no'&&<Tag>{r.lo}–{r.hi} tok/s est.</Tag>}</div></Card>})}</div></>:null}
+  </div></div>;
+}
+
+/* ================= RECOMMENDER ================= */
+const PRI=[{k:'intel',l:'Intelligence',c:'#F47321',d:'Average benchmark score across Artificial Analysis, Arena, LiveBench and Epoch AI'},{k:'speed',l:'Speed',c:'#B4D7CD',d:'Time for an API endpoint to finish a typical task'},{k:'cost',l:'Cost',c:'#8EA8C3',d:'What it costs to run a typical task through the API'}];
+const imp=v=>v<=2?'Not important':v<=4?'Low importance':v<=6?'Moderately important':v<=8?'Important':'Very important';
+function PSlider({p,value,onChange}){const ref=useRef(null);
+ const at=e=>{const r=ref.current.getBoundingClientRect();onChange(Math.min(10,Math.max(1,Math.ceil(10*(e.clientX-r.left)/r.width))))};
+ const key=e=>{const k=e.key;if(k==='ArrowRight'||k==='ArrowUp'){e.preventDefault();onChange(Math.min(10,value+1))}else if(k==='ArrowLeft'||k==='ArrowDown'){e.preventDefault();onChange(Math.max(1,value-1))}else if(k==='Home'){e.preventDefault();onChange(1)}else if(k==='End'){e.preventDefault();onChange(10)}};
+ return <div className="rounded-[20px] bg-soft border border-line p-5 sm:p-6 flex flex-col">
+  <div className="flex items-center gap-3"><span className="h-5 w-5 rounded-md" style={{background:p.c,boxShadow:'inset 0 0 0 1px rgba(15,23,38,.18)'}}/><h3 className="serif text-[34px] leading-none">{p.l}</h3></div>
+  <p className="text-mute text-sm mt-3 min-h-[2.8rem]">{p.d}</p>
+  <div className="flex justify-end items-baseline gap-2 mt-auto pt-6"><span key={imp(value)} className="fade font-semibold">{imp(value)}</span><span className="num text-xs text-mute">{value}/10</span></div>
+  <div ref={ref} role="slider" tabIndex="0" aria-label={p.l+' importance'} aria-valuemin="1" aria-valuemax="10" aria-valuenow={value} aria-valuetext={`${value} of 10, ${imp(value)}`}
+   onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);at(e)}} onPointerMove={e=>{if(e.buttons)at(e)}} onKeyDown={key}
+   className="relative mt-2 h-12 rounded-full bg-card border border-line cursor-pointer touch-none select-none overflow-hidden">
+   <div className="trk absolute inset-y-0 left-0 rounded-full" style={{width:`${value*10}%`,background:`color-mix(in srgb, ${p.c} 38%, transparent)`}}><span key={value} className="pop absolute right-2 top-1/2 -mt-4 h-8 w-8 rounded-full grid place-items-center text-xs font-bold num text-onacc" style={{background:p.c,boxShadow:'0 2px 8px rgba(15,23,38,.25)'}}>{value}</span></div>
+   {Array.from({length:10},(_,i)=>i+1).filter(n=>n>value).map(n=><span key={n} className="absolute top-1/2 -mt-[3px] h-1.5 w-1.5 -ml-[3px] rounded-full bg-mute/40" style={{left:`${n*10-5}%`}}/>)}
+  </div></div>;
+}
+function OptGroup({label,opts,value,onChange,multi}){const on=v=>multi?value.includes(v):value===v;
+ return <fieldset><legend className="serif text-3xl">{label}</legend>{multi&&<p className="text-sm text-mute">Pick any, or none</p>}
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-3">{opts.map(([v,l],j)=><button key={String(v)} aria-pressed={on(v)} onClick={()=>onChange(multi?(on(v)?value.filter(x=>x!==v):[...value,v]):v)} className={`pick fade h-14 px-5 rounded-2xl border text-left text-sm font-semibold flex justify-between items-center gap-2 ${on(v)?'border-ink bg-ink text-bg':'border-line bg-soft hover:border-ink'}`} style={{animationDelay:j*40+'ms'}}>{l}{on(v)&&<span className="h-6 w-6 rounded-full bg-acc text-onacc grid place-items-center"><Ico n="check" on size={14}/></span>}</button>)}</div></fieldset>}
+const RSTEPS=[['Set your priorities','Move the sliders to set how important each factor is for your use case'],['What kind of model?','Rule out models you can’t use'],['What goes in and out?','Only models that handle every type you pick will show'],['Context and use case','The use case decides which score counts as intelligence'],['Your matches','Ranked by your priorities. Click a model for details.']];
+const FOCUS=[['intel','General'],['coding','Coding'],['agentic','Agents & tools'],['cyber','Cybersecurity'],['math','Math'],['long_ctx','Long documents']];
+function Recommender({open}){
+ const [a,setA]=useState({intel:9,speed:3,cost:3,weights:'any',reason:'any',inp:[],out:[],ctx:0,focus:'intel',prov:DEF_PROV});const [i,setI]=useState(0);const S=v=>setA(s=>({...s,...v}));
+ const tot=a.intel+a.speed+a.cost,last=RSTEPS.length-1;
+ const pool=useMemo(()=>MODELS.filter(m=>a.prov.includes(m.creator)&&(a.weights==='any'||(a.weights==='open')==!!m.open)&&(a.reason==='any'||(a.reason==='yes')==!!m.reasoning)&&a.inp.every(x=>m.inp.includes(x))&&a.out.every(x=>m.out.includes(x))&&m.ctx_k>=a.ctx),[a]);
+ const res=useMemo(()=>{if(!pool.length)return [];const rng=f=>{const v=pool.map(f);return [Math.min(...v),Math.max(...v)]};
+  const [ci,ca]=rng(m=>Math.log(m.cost_task)),[ti,ta]=rng(m=>Math.log(m.time_task)),[ii,ia]=rng(m=>m[a.focus]);const sc=(v,lo,hi)=>hi===lo?1:(v-lo)/(hi-lo);
+  return pool.map(m=>({m,match:Math.round(100*(a.intel*sc(m[a.focus],ii,ia)+a.cost*(1-sc(Math.log(m.cost_task),ci,ca))+a.speed*(1-sc(Math.log(m.time_task),ti,ta)))/tot)})).sort((x,y)=>y.match-x.match)},[pool,a.intel,a.speed,a.cost,a.focus]);
+ return <Card className="p-5 sm:p-8">
+  <div className="flex flex-wrap items-center gap-3"><span className="text-sm text-mute">Step {i+1} of {RSTEPS.length}</span><div className="flex gap-1.5">{RSTEPS.map((s,j)=><button key={j} aria-label={`Go to step ${j+1}: ${s[0]}`} onClick={()=>setI(j)} className="h-6 flex items-center"><span className="block h-1.5 w-8 sm:w-12 rounded-full transition-colors duration-500" style={{background:j<=i?'var(--acc)':'var(--line)'}}/></button>)}</div></div>
+  <div key={i} className="slide mt-8">
+   <h2 className="text-[clamp(26px,3.4vw,40px)] font-semibold tracking-tight leading-tight">{i===last&&res[0]?`Best match: ${res[0].m.name}`:RSTEPS[i][0]}</h2><p className="text-mute mt-1">{RSTEPS[i][1]}</p>
+   <div className="mt-7">
+    {i===0&&<><div className="grid md:grid-cols-3 gap-4">{PRI.map(p=><PSlider key={p.k} p={p} value={a[p.k]} onChange={v=>S({[p.k]:v})}/>)}</div>
+     <div className="mx-auto mt-10 max-w-lg"><div className="flex h-3 rounded-full overflow-hidden gap-0.5" role="img" aria-label={PRI.map(p=>`${p.l} ${Math.round(100*a[p.k]/tot)}%`).join(', ')}>{PRI.map(p=><div key={p.k} className="trk h-full" style={{width:100*a[p.k]/tot+'%',background:p.c}}/>)}</div>
+      <div className="flex justify-between text-xs text-mute mt-2 num">{PRI.map(p=><span key={p.k}>{p.l} {Math.round(100*a[p.k]/tot)}%</span>)}</div></div></>}
+    {i===1&&<div className="space-y-9 max-w-3xl"><OptGroup label="Weights" value={a.weights} onChange={v=>S({weights:v})} opts={[['any','No preference'],['open','Open weights only'],['closed','Closed only']]}/><OptGroup label="Reasoning" value={a.reason} onChange={v=>S({reason:v})} opts={[['any','No preference'],['yes','Reasoning'],['no','Non-reasoning']]}/></div>}
+    {i===2&&<div className="space-y-9 max-w-3xl"><OptGroup multi label="Must accept as input" value={a.inp} onChange={v=>S({inp:v})} opts={[['image','Images'],['audio','Audio'],['video','Video'],['file','Files / PDFs']]}/><OptGroup multi label="Must produce" value={a.out} onChange={v=>S({out:v})} opts={[['image','Images'],['audio','Audio']]}/></div>}
+    {i===3&&<div className="space-y-9 max-w-3xl"><OptGroup label="Minimum context" value={a.ctx} onChange={v=>S({ctx:v})} opts={[[0,'Any'],[128,'128K+'],[256,'256K+'],[400,'400K+'],[1000,'1M+']]}/><OptGroup label="Main use case" value={a.focus} onChange={v=>S({focus:v})} opts={FOCUS}/><div><div className="serif text-3xl mb-3">Providers</div><ProviderSelect value={a.prov} onChange={v=>S({prov:v})}/></div></div>}
+    {i===last&&(res.length?<TableBox><thead className="bg-soft"><tr>{['Rank','Model','Match',a.focus==='intel'?'Intelligence':FOCUS.find(o=>o[0]===a.focus)[1],'Cost / task','Time / task','Speed','Context','Weights'].map((h,j)=><Th key={h} r={j>1}>{h}</Th>)}</tr></thead>
+     <tbody>{res.map((x,j)=><tr key={x.m.id} className="border-t border-line fade" style={{animationDelay:j*50+'ms',background:j===0?'color-mix(in srgb, var(--butter) 55%, transparent)':undefined}}>
+      <td className="p-3 num font-bold">{j+1}</td><td className="p-3"><button onClick={()=>open(x.m)} className="font-semibold hover:underline text-left">{x.m.name}</button><div className="text-xs text-mute">{x.m.creator}</div></td>
+      <td className="p-3 text-right num font-bold">{x.match}%</td><td className="p-3 text-right num">{x.m[a.focus]}</td><td className="p-3 text-right num">{fmt$(x.m.cost_task)}</td><td className="p-3 text-right num">{fmtS(x.m.time_task)}</td><td className="p-3 text-right num">{x.m.tps} tok/s</td><td className="p-3 text-right num">{ctxL(x.m.ctx_k)}</td><td className="p-3 text-right">{x.m.open?'Open':'Closed'}</td></tr>)}</tbody></TableBox>
+     :<div className="rounded-2xl bg-soft p-6"><p className="font-semibold">Nothing matches all requirements.</p><p className="text-mute text-sm mt-1">Go back a step and loosen one. Output type, context and providers are usually the strictest.</p></div>)}
+   </div></div>
+  <div className="flex flex-wrap items-center gap-3 mt-10 pt-5 border-t border-line">
+   <button onClick={()=>setI(Math.max(0,i-1))} disabled={i===0} className="h-12 px-5 rounded-full border border-line text-xs font-bold uppercase tracking-[.06em] disabled:opacity-30 flex items-center gap-1.5"><Ico n="back" size={16}/>Back</button>
+   {i<last?<Pill acc onClick={()=>setI(i+1)}>{i===last-1?'See matches':'Next'}</Pill>:<Pill onClick={()=>setI(0)}>Start over</Pill>}
+   {i<last&&<span key={pool.length} className="pop text-sm text-mute ml-auto"><span className="num font-bold text-ink">{pool.length}</span> of {MODELS.length} models match so far</span>}
+  </div></Card>;
+}
+
+/* ================= HARDWARE ================= */
+const FIELDS=[
+ {g:'Memory',f:[{k:'arch',l:'Memory type',t:'sel',wide:1,o:[['discrete','Separate GPU memory (PC with graphics card)'],['unified','Unified / shared memory (Mac, DGX Spark, Ryzen AI Max)'],['cpu','No GPU (CPU only)']],h:'Unified memory lets the whole RAM act as GPU memory. With a separate card, only the card’s VRAM is fast.'},
+  {k:'gpus',l:'GPUs / devices',t:'n',u:'',h:'More cards add memory. Splitting one model across cards costs some speed.',hide:s=>s.arch==='cpu'},
+  {k:'vram',l:'VRAM per GPU',t:'n',u:'GB',h:'The hard limit for fast inference. Weights + context cache must fit here to run at full speed.',hide:s=>s.arch!=='discrete'},
+  {k:'ram',l:'System RAM',t:'n',u:'GB',h:'On unified machines this is the model memory. On PCs it holds whatever spills out of VRAM, at much lower speed.'}]},
+ {g:'Speed',f:[{k:'gbw',l:'GPU bandwidth',t:'n',u:'GB/s',h:'Sets how fast tokens come out. On the GPU spec sheet (e.g. RTX 4090 ≈ 1,008 GB/s).',hide:s=>s.arch==='cpu'},
+  {k:'rbw',l:'RAM bandwidth',t:'n',u:'GB/s',h:'Matters when layers spill into RAM. Dual-channel DDR5 ≈ 80–100 GB/s.',hide:s=>s.arch==='unified'},
+  {k:'link',l:'Link between GPUs',t:'sel',wide:1,o:[['pcie','PCIe'],['nvlink','NVLink'],['network','Network (separate machines)']],h:'Only matters with 2+ devices. Separate machines are the slowest to split a model across.',hide:s=>s.gpus<2||s.arch==='cpu'}]},
+ {g:'Compute & software',f:[{k:'tf',l:'Compute (FP16)',t:'n',u:'TFLOPS',h:'Sets how fast long prompts are read before the first token.'},
+  {k:'be',l:'Software platform',t:'sel',o:[['cuda','NVIDIA CUDA'],['rocm','AMD ROCm'],['metal','Apple Metal'],['vulkan','Vulkan (other GPUs)'],['cpu','CPU only']],h:'GGUF files run on all of these via llama.cpp. vLLM/SGLang formats need CUDA or ROCm.'},
+  {k:'fp8',l:'Supports FP8',t:'bool',h:'Some official weights ship in FP8 and need a recent GPU (RTX 40/50, H100, Blackwell).'}]},
+ {g:'Storage',f:[{k:'disk',l:'Free disk',t:'n',u:'GB',h:'You must download the full file before running it.'},{k:'dspd',l:'Disk speed',t:'n',u:'GB/s',h:'Sets load time. NVMe ≈ 3–7 GB/s, SATA SSD ≈ 0.5 GB/s, HDD ≈ 0.15 GB/s.'}]},
+];
+function Field({d,s,set}){const [h,setH]=useState(false);const id='f-'+d.k;
+ return <div className={d.wide?'col-span-2':''}><div className="flex items-center gap-1"><label htmlFor={id} className="text-sm font-semibold">{d.l}</label><button aria-label={'About '+d.l} aria-expanded={h} onClick={()=>setH(!h)} className="h-8 w-8 grid place-items-center rounded-full text-mute hover:text-ink"><Ico n="info" size={16}/></button></div>
+  {h&&<p className="fade text-xs text-mute mb-1.5">{d.h}</p>}
+  {d.t==='n'&&<div className="flex"><input id={id} type="number" min="0" inputMode="decimal" value={s[d.k]} onChange={e=>set({...s,[d.k]:+e.target.value})} className="h-11 w-full rounded-l-xl border border-line bg-card px-3 num"/>{d.u&&<span className="h-11 px-2.5 grid place-items-center rounded-r-xl border border-l-0 border-line bg-soft text-sm text-mute">{d.u}</span>}</div>}
+  {d.t==='sel'&&<select id={id} value={s[d.k]} onChange={e=>set({...s,[d.k]:e.target.value})} className="h-11 w-full rounded-xl border border-line bg-card px-2">{d.o.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>}
+  {d.t==='bool'&&<button id={id} role="switch" aria-checked={s[d.k]} onClick={()=>set({...s,[d.k]:!s[d.k]})} className={`h-8 w-14 rounded-full p-1 transition-colors ${s[d.k]?'bg-acc':'bg-line'}`}><span className="block h-6 w-6 rounded-full bg-card transition-transform duration-300" style={{transform:s[d.k]?'translateX(24px)':'none'}}/></button>}</div>}
+const EXAMPLES=['Gaming PC with an RTX 4090, 64GB DDR5 and a 2TB NVMe','Two DGX Sparks linked together','MacBook Pro M4 Max with 128GB'];
+function cleanSpec(x){const o={...BLANK};if(!x||typeof x!=='object')return o;for(const k of ['gpus','vram','gbw','ram','rbw','tf','disk','dspd']){const n=Number(x[k]);if(isFinite(n)&&n>=0)o[k]=n}
+ if(['discrete','unified','cpu'].includes(x.arch))o.arch=x.arch;if(['pcie','nvlink','network'].includes(x.link))o.link=x.link;if(['cuda','rocm','metal','vulkan','cpu'].includes(x.be))o.be=x.be;o.fp8=!!x.fp8;o.gpus=Math.max(1,Math.round(o.gpus));return o}
+function AskAI({spec,setSpec,rows}){
+ const [msgs,setMsgs]=useState([]);const [t,setT]=useState('');const [busy,setBusy]=useState(false);const [ai,setAi]=useState(undefined);const end=useRef(null);
+ useEffect(()=>{let on=true;Promise.resolve(window.claude?.use?.('sample')).then(x=>{if(on)setAi(x||null)}).catch(()=>{if(on)setAi(null)});return()=>{on=false}},[]);
+ useEffect(()=>{end.current?.scrollIntoView({block:'nearest',behavior:'smooth'})},[msgs,busy]);
+ const send=async text=>{text=text.trim();if(!text||busy||!ai)return;const hist=[...msgs,{role:'user',content:text}];setMsgs(hist);setT('');setBusy(true);
+  const cat=DEVICES.map(d=>`${d.name}: ${d.t==='gpu'?'GPU card':'unified-memory system'}, ${d.mem} GB, ${d.bw} GB/s, ${d.tf} FP16 TFLOPS, FP8 ${d.fp8?'yes':'no'}, ${d.be}`).join('\n');
+  const prompt=`You turn a person's description of their computer(s) into specs for an LLM hardware-fit calculator.\nKnown devices (approximate):\n${cat}\n\nSpec fields: arch ("discrete" = PC with graphics card(s), "unified" = shared-memory system like Mac or DGX Spark, "cpu" = no usable GPU); gpus (number of GPUs or unified devices); vram (GB per GPU, 0 for unified); gbw (GPU or unified memory bandwidth GB/s, slowest device if several); link ("pcie","nvlink","network" for separate machines); ram (system RAM GB; for unified = total unified memory across devices); rbw (system RAM bandwidth GB/s; DDR5 dual-channel ~90, DDR4 ~50; unified = gbw); tf (total FP16 TFLOPS); fp8 (bool); be ("cuda","rocm","metal","vulkan","cpu"); disk (free GB, default 1000); dspd (disk read GB/s; NVMe 5, SATA SSD 0.5, HDD 0.15).\nFill unknowns with typical values and say which you assumed.\n\nCurrent spec: ${JSON.stringify(spec||null)}\nConversation:\n${hist.map(m=>`${m.role}: ${m.content}`).join('\n')}\n\nReply with JSON only: {"reply":"2-3 plain sentences: what you understood, the assumptions you made, and one question only if something important is missing","spec":{...all fields...}}`;
+  try{const out=await ai.json(prompt,{modelTier:'quick'});setSpec(cleanSpec(out&&out.spec));setMsgs([...hist,{role:'assistant',content:String((out&&out.reply)||'Specs updated.'),ok:1}])}
+  catch(e){setMsgs([...hist,{role:'assistant',err:1,content:e&&e.code==='rate_limited'?'Too many requests right now. Wait a moment, then send again.':e&&e.code==='not_granted'?'Ask AI needs permission to use Claude. Send again and allow it when asked.':'I couldn’t read that. Try naming the GPU or computer model and its memory.'}])}
+  setBusy(false)};
+ const fast=rows.filter(r=>r.best.where==='gpu').slice(0,3).map(r=>r.m.name),lastAi=msgs.map(m=>m.ok).lastIndexOf(1);
+ if(ai===null)return <div className="rounded-2xl bg-soft p-5"><p className="font-semibold">Ask AI isn't available in this view.</p><p className="text-sm text-mute mt-1">Use Pick devices or Enter specs instead.</p></div>;
+ return <div className="rounded-2xl bg-soft border border-line p-3 flex flex-col">
+  <div className="max-h-[26rem] min-h-[13rem] overflow-y-auto space-y-3 p-1" aria-live="polite">
+   {!msgs.length&&<div className="p-2"><div className="flex items-center gap-2"><Gem k="probe" size={28}/><p className="font-semibold">Describe your hardware in your own words.</p></div><p className="text-sm text-mute mt-2">Model names are enough. Claude fills in the specs; Atlas works out what runs.</p>
+    <div className="flex flex-col gap-2 mt-4">{EXAMPLES.map(x=><button key={x} onClick={()=>send(x)} disabled={!ai} className="text-left text-sm rounded-2xl border border-line bg-card px-4 py-3 hover:border-ink disabled:opacity-50">{x}</button>)}</div></div>}
+   {msgs.map((m,j)=><div key={j} className={`fade flex ${m.role==='user'?'justify-end':''}`}><div className={`max-w-[88%] rounded-2xl px-4 py-2.5 text-sm ${m.role==='user'?'bg-ink text-bg':m.err?'border border-current text-warn bg-card':'bg-card border border-line'}`}>
+    <p className="whitespace-pre-wrap">{m.content}</p>{j===lastAi&&<p className="mt-2 pt-2 border-t border-line text-xs"><span className="font-bold">{rows.filter(r=>r.best.where!=='no').length} of {rows.length} open models run.</span>{fast.length?` Full speed: ${fast.join(', ')}.`:' None fit fully in fast memory.'}</p>}</div></div>)}
+   {busy&&<div className="flex gap-1.5 p-2" aria-label="Claude is thinking">{[0,1,2].map(k=><span key={k} className="h-2 w-2 rounded-full bg-acc dot" style={{animationDelay:k*150+'ms'}}/>)}</div>}<div ref={end}/></div>
+  <form onSubmit={e=>{e.preventDefault();send(t)}} className="flex gap-2 mt-2 items-end">
+   <label htmlFor="ask" className="sr-only">Describe your hardware</label>
+   <textarea id="ask" rows="2" value={t} onChange={e=>setT(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(t)}}} placeholder={ai===undefined?'Connecting to Claude…':'e.g. Ryzen 9 with two RTX 3090s and 128GB RAM'} className="flex-1 resize-none rounded-2xl border border-line bg-card px-4 py-3 text-base"/>
+   <button type="submit" disabled={!t.trim()||busy||!ai} aria-label="Send" className="h-12 w-12 grid place-items-center rounded-full bg-acc text-onacc disabled:opacity-40"><Ico n="send" size={18}/></button></form></div>;
+}
+function Planner({mode,setMode,picks,setPicks,manual,setManual,host,setHost,open,spec,setAiSpec,profile,toQuants}){
+ const [q,setQ]=useState('');const [cat,setCat]=useState('All');const [ctx,setCtx]=useState(32);
+ const list=DEVICES.filter(d=>(cat==='All'||d.cat===cat)&&d.name.toLowerCase().includes(q.toLowerCase()));
+ const step=(id,dv)=>setPicks(p=>({...p,[id]:Math.max(0,(p[id]||0)+dv)}));const needsHost=DEVICES.some(d=>picks[d.id]>0&&d.t==='gpu');
+ const rk={gpu:0,offload:1,cpu:1,no:2};
+ const rows=spec?MODELS.filter(m=>m.open).map(m=>({m,...bestRun(m,spec,ctx)})).sort((x,y)=>rk[x.best.where]-rk[y.best.where]||y.m.intel-x.m.intel):[];
+ const fast=rows.filter(r=>r.best.where==='gpu').length,any=rows.filter(r=>r.best.where!=='no').length,nMeas=rows.filter(r=>measured(r.m,r.best.v,spec)).length;
+ return <div className="grid lg:grid-cols-[minmax(0,25rem)_minmax(0,1fr)] gap-5 items-start">
+  <Card className="p-4 sm:p-5">
+   <div role="tablist" aria-label="Hardware input" className="grid grid-cols-3 p-1 rounded-full bg-soft border border-line">{[['pick','Pick devices'],['manual','Enter specs'],['ai','Ask AI']].map(([k,l])=><button key={k} role="tab" aria-selected={mode===k} onClick={()=>setMode(k)} className={`h-10 rounded-full text-sm font-semibold transition-colors ${mode===k?'bg-ink text-bg':''}`}>{l}</button>)}</div>
+   <div key={mode} className="fade mt-4 space-y-4">
+    {mode==='ai'?<AskAI spec={spec} setSpec={setAiSpec} rows={rows}/>:mode==='pick'?<>
+     <div className="relative"><span className="absolute left-3.5 top-3.5 text-mute"><Ico n="search" size={16}/></span><label htmlFor="dq" className="sr-only">Search devices</label><input id="dq" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search 2,000+ devices" className="h-11 pl-10 pr-3 w-full rounded-full border border-line bg-card"/></div>
+     <div className="flex flex-wrap gap-1.5">{['All',...CATS].map(c=><button key={c} onClick={()=>setCat(c)} aria-pressed={cat===c} className={`h-9 px-3 rounded-full text-xs font-semibold border ${cat===c?'bg-ink text-bg border-ink':'border-line'}`}>{c}</button>)}</div>
+     <ul className="max-h-80 overflow-y-auto divide-y divide-line -mx-1 px-1">{list.map(d=><li key={d.id} className="flex items-center justify-between gap-2 py-2.5">
+      <div><div className="text-sm font-semibold">{d.name}</div><div className="text-xs text-mute num">{d.mem} GB {d.t==='unified'?'unified':'VRAM'} · {d.bw} GB/s</div></div>
+      {picks[d.id]>0?<div className="flex items-center gap-1 pop"><button aria-label={'Remove '+d.name} onClick={()=>step(d.id,-1)} className="h-9 w-9 rounded-full border border-line font-bold">−</button><span className="w-6 text-center num font-bold">{picks[d.id]}</span><button aria-label={'Add another '+d.name} onClick={()=>step(d.id,1)} className="h-9 w-9 rounded-full border border-line font-bold">+</button></div>
+      :<button onClick={()=>step(d.id,1)} className="h-9 px-4 rounded-full border border-line text-xs font-bold uppercase tracking-[.06em] hover:bg-acc hover:border-acc hover:text-onacc transition-colors">Add</button>}</li>)}
+      {!list.length&&<li className="py-4 text-sm text-mute">No device found. Use Enter specs instead.</li>}</ul>
+     {needsHost&&<div className="rounded-2xl bg-soft p-4"><h3 className="font-semibold text-sm">The PC the GPU sits in</h3><div className="grid grid-cols-2 gap-3 mt-3">{[['ram','System RAM','GB'],['rbw','RAM bandwidth','GB/s'],['disk','Free disk','GB'],['dspd','Disk speed','GB/s']].map(([k,l,u])=><div key={k}><label htmlFor={'h'+k} className="text-xs font-semibold">{l}</label><div className="flex mt-1"><input id={'h'+k} type="number" value={host[k]} onChange={e=>setHost({...host,[k]:+e.target.value})} className="h-10 w-full rounded-l-xl border border-line bg-card px-2 num"/><span className="h-10 px-2 grid place-items-center rounded-r-xl border border-l-0 border-line bg-card text-xs text-mute">{u}</span></div></div>)}</div></div>}
+     {spec&&<button onClick={()=>{setManual(spec);setMode('manual')}} className="text-sm font-semibold underline underline-offset-4 decoration-[#F47321] decoration-2 h-10">Fine-tune these specs by hand</button>}
+    </>:<div className="space-y-5">{FIELDS.map(g=><div key={g.g}><h3 className="serif text-2xl">{g.g}</h3><div className="grid grid-cols-2 gap-x-3 gap-y-4 mt-2 items-start">{g.f.filter(d=>!d.hide||!d.hide(manual)).map(d=><Field key={d.k} d={d} s={manual} set={setManual}/>)}</div></div>)}</div>}
+   </div></Card>
+  <Card className="p-4 sm:p-6">
+   <Head title={spec?`${any} of ${rows.length} open models run here, ${fast} at full speed`:'Tell Atlas what hardware you have'}/>
+   {profile&&<p className="text-sm text-mute mt-1">Specs from your device test: {profile}</p>}
+   {spec?<>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">{[['Fast memory',Math.round(fastMem(spec)),'GB'],['Spill-over RAM',spec.arch==='unified'?'–':Math.round(Math.max(0,spec.ram*0.8-4)),'GB'],['Bandwidth',spec.arch==='cpu'?spec.rbw:spec.gbw,'GB/s'],['Measured rows',nMeas,'']].map(([l,v,u])=><div key={l} className="rounded-2xl bg-soft p-3.5"><div className="text-xs text-mute">{l}</div><div className="flex items-baseline gap-1"><span key={v} className="serif text-4xl num pop">{v}</span><span className="text-xs text-mute">{u}</span></div></div>)}</div>
+    <div className="mt-4 flex flex-wrap items-center gap-3"><label htmlFor="pctx" className="text-sm font-semibold">Context to reserve</label><input id="pctx" type="range" min="4" max="256" step="4" value={ctx} onChange={e=>setCtx(+e.target.value)} className="flex-1 accent-[#F47321] h-8"/><span className="num font-semibold text-sm w-24 text-right">{ctx}K tokens</span></div>
+    <div className="mt-3"><TableBox><thead className="bg-soft"><tr><Th>Model</Th><Th>Best file</Th><Th>Runs</Th><Th r>Memory</Th><Th r>Speed</Th><Th r>Prompt read</Th><Th r>Load</Th></tr></thead>
+     <tbody>{rows.map(({m,best})=>{const me=measured(m,best.v,spec);return <tr key={m.id} className="border-t border-line hover:bg-soft align-top">
+      <td className="p-3"><button onClick={()=>open(m)} className="font-semibold hover:underline text-left">{m.name}</button><div className="text-xs text-mute num">{m.total_b}B · {m.active_b}B active</div></td>
+      <td className="p-3 text-xs"><div className="font-semibold">{best.v.up} · {best.v.q}</div><div className="text-mute num">{best.v.gb} GB{best.v.kld>0?` · KLD ${best.v.kld}`:best.v.kld===0?' · original':''}</div>{m.variants.length>3&&<button onClick={()=>toQuants(m.id)} className="mt-1 underline underline-offset-2 decoration-[#F47321] font-semibold">compare quants</button>}</td>
+      <td className="p-3"><Where w={best.where}/>{best.where!=='no'&&<div className="text-xs text-mute mt-1">via {me?me.rt:best.rt}{best.solo?' · one device':''}</div>}{best.where==='no'&&<div className="text-xs text-mute mt-1 max-w-[12rem]">{best.why}</div>}{!best.disk&&best.where!=='no'&&<div className="text-xs text-warn mt-1 font-semibold">Not enough disk</div>}</td>
+      <td className="p-3 text-right num">{best.need} GB</td><td className="p-3"><Speed r={best} meas={me}/></td><td className="p-3 text-right num">{best.where==='no'?'–':(me?me.pp:'≈'+best.prefill)+' tok/s'}</td><td className="p-3 text-right num">{best.where==='no'?'–':fmtS(best.load)}</td></tr>})}</tbody></TableBox></div>
+    <p className="text-xs text-mute mt-3">Measured rows come from device tests people shared for this exact device and file. Everything else is an estimate from memory bandwidth (ceiling) and typical efficiency.</p>
+   </>:<div className="mt-6 rounded-2xl bg-soft p-8 text-center"><Gem k="hardware" size={48}/><p className="font-semibold mt-3">{mode==='ai'?'Describe your hardware to see which models run.':'Add a device to see which models run.'}</p></div>}
+  </Card></div>;
+}
+
+/* ================= QUANT COMPARISON ================= */
+const UPC={unsloth:['#F47321','circle'],bartowski:['#8EA8C3','square'],'lmstudio-community':['#B4D7CD','diamond'],mradermacher:['#FFEEB3','triangle'],'ggml-org':['var(--ink)','circle']};
+const upStyle=u=>UPC[u]||['#c9ced6','circle'];
+const Mark=({x,y,u,r=6.5,ring})=>{const [c,sh]=upStyle(u);const p={fill:c,stroke:'var(--ink)',strokeWidth:1.2};
+ return <g>{ring&&<circle cx={x} cy={y} r={r+6} fill="none" stroke="var(--acc)" strokeWidth="2.5"/>}{sh==='square'?<rect x={x-r+.5} y={y-r+.5} width={2*r-1} height={2*r-1} rx="1.5" {...p}/>:sh==='diamond'?<path d={`M${x} ${y-r-1}L${x+r+1} ${y}L${x} ${y+r+1}L${x-r-1} ${y}Z`} {...p}/>:sh==='triangle'?<path d={`M${x} ${y-r-1}L${x+r+1} ${y+r}L${x-r-1} ${y+r}Z`} {...p}/>:<circle cx={x} cy={y} r={r} {...p}/>}</g>};
+function Scatter({pts,front,best,bud}){
+ const ref=useRef(null);const [sz,setSz]=useState({w:600,h:340});
+ useEffect(()=>{const el=ref.current;const ro=new ResizeObserver(()=>setSz({w:el.clientWidth,h:el.clientHeight}));ro.observe(el);return()=>ro.disconnect()},[]);
+ const {w,h}=sz,narrow=w<520,L=narrow?44:56,R=16,T=18,B=42;
+ const xs=pts.map(p=>p.gb),x0=Math.floor(Math.min(...xs)*0.9),x1=Math.ceil(Math.max(...xs)*1.05);
+ const yk=pts.map(p=>p.kld),y0=Math.log10(Math.min(...yk)*0.7),y1=Math.log10(Math.max(...yk)*1.4);
+ const X=v=>L+(w-L-R)*(v-x0)/(x1-x0||1),Y=v=>T+(h-T-B)*(Math.log10(v)-y0)/(y1-y0||1);
+ const yt=[0.001,0.003,0.01,0.03,0.1,0.3].filter(v=>Math.log10(v)>=y0&&Math.log10(v)<=y1);
+ const step=(x1-x0)>200?100:(x1-x0)>60?20:(x1-x0)>25?5:2;const xt=[];for(let v=Math.ceil(x0/step)*step;v<=x1;v+=step)xt.push(v);
+ const bx=X(Math.min(Math.max(bud,x0),x1));
+ return <div ref={ref} className="relative h-[340px] sm:h-[380px]"><svg width={w} height={h} role="img" aria-label="Quality loss versus file size for each quant, by uploader">
+  <rect x={bx} y={T} width={Math.max(0,w-R-bx)} height={h-T-B} fill="var(--soft)"/>
+  {yt.map(v=><g key={v}><line x1={L} x2={w-R} y1={Y(v)} y2={Y(v)} stroke="var(--line)"/><text x={L-8} y={Y(v)+4} textAnchor="end" fontSize="12" fill="var(--mute)">{v}</text></g>)}
+  {xt.filter((_,i)=>!narrow||i%2===0).map(v=><text key={v} x={X(v)} y={h-B+18} textAnchor="middle" fontSize="12" fill="var(--mute)">{v} GB</text>)}
+  <text x={L} y={h-6} fontSize="12" fill="var(--mute)">File size →</text><text x={L-6} y={T-6} fontSize="12" fill="var(--mute)" textAnchor="start" transform={`translate(${-L+14} 0)`}>Quality loss (KLD, log) — lower is better</text>
+  <polyline points={front.map(p=>`${X(p.gb)},${Y(p.kld)}`).join(' ')} fill="none" stroke="var(--ink)" strokeWidth="1.5" strokeDasharray="5 4"/>
+  <line x1={bx} x2={bx} y1={T} y2={h-B} stroke="var(--acc)" strokeWidth="2"/><text x={Math.min(bx+6,w-R-70)} y={T+14} fontSize="12" fontWeight="700" fill="var(--ink)" style={{paintOrder:'stroke',stroke:'var(--card)',strokeWidth:4}}>{bud} GB budget</text>
+  {pts.map((p,i)=><Mark key={i} x={X(p.gb)} y={Y(p.kld)} u={p.up} ring={best&&p===best}/>)}
+  {best&&<text x={Math.min(X(best.gb)+14,w-R-150)} y={Math.max(Y(best.kld)-14,T+30)} fontSize="13" fontWeight="700" fill="var(--ink)" style={{paintOrder:'stroke',stroke:'var(--card)',strokeWidth:4}}>{best.up} {best.q}</text>}
+ </svg></div>;
+}
+function Quants({qid,setQid,spec,open}){
+ const qm=MODELS.filter(m=>m.variants.filter(v=>v.kind==='quant').length>=4);
+ const m=qm.find(x=>x.id===qid)||qm[0];const all=m.variants.filter(v=>v.kind==='quant');
+ const pts=all.filter(v=>v.kld>0);const lo=Math.floor(Math.min(...pts.map(p=>p.gb))),hiG=Math.ceil(Math.max(...pts.map(p=>p.gb)));
+ const fit=spec?Math.floor(fastMem(spec)-m.kv_kb*32000/1048576-1.5):null;
+ const [bud,setBud]=useState(()=>Math.min(hiG,Math.max(lo,fit||Math.round((lo+hiG)/2))));
+ useEffect(()=>{setBud(b=>Math.min(hiG,Math.max(lo,b)))},[m.id]);
+ const front=[...pts].sort((a,b)=>a.gb-b.gb||a.kld-b.kld).reduce((acc,p)=>{if(!acc.length||p.kld<acc[acc.length-1].kld)acc.push(p);return acc},[]);
+ const best=pts.filter(p=>p.gb<=bud).sort((a,b)=>a.kld-b.kld||a.gb-b.gb)[0];
+ const ups=[...new Set(pts.map(p=>p.up))];
+ // biggest gap between uploaders at the same size
+ const groups={};pts.forEach(p=>{const k=Math.round(p.gb);(groups[k]=groups[k]||[]).push(p)});
+ const gap=Object.values(groups).filter(g=>new Set(g.map(p=>p.up)).size>1).map(g=>{const s=[...g].sort((a,b)=>a.kld-b.kld);return {a:s[0],b:s[s.length-1],r:s[s.length-1].kld/s[0].kld}}).sort((x,y)=>y.r-x.r)[0];
+ const others=MODELS.filter(x=>x.open&&!qm.includes(x));
+ return <div className="space-y-5">
+  <Card className="p-4 sm:p-6">
+   <Head title={best?`Best under ${bud} GB: ${best.up} ${best.q}`:`No ${m.name} quant fits in ${bud} GB`}/>
+   <p className="text-mute mt-1">{best?`KLD ${best.kld} at ${best.gb} GB. `:''}{gap?`At about ${Math.round(gap.a.gb)} GB, ${gap.a.up}'s file loses ${gap.r.toFixed(1)}× less than ${gap.b.up}'s.`:''}</p>
+   <div className="flex flex-wrap gap-2 mt-5">{qm.map(x=><Chip key={x.id} on={x.id===m.id} onClick={()=>setQid(x.id)}>{x.name}</Chip>)}</div>
+   <div className="mt-4 flex flex-wrap items-center gap-3"><label htmlFor="bud" className="text-sm font-semibold">Memory budget</label><input id="bud" type="range" min={lo} max={hiG} step="0.5" value={bud} onChange={e=>setBud(+e.target.value)} className="flex-1 min-w-[10rem] accent-[#F47321] h-8"/><span className="num font-semibold text-sm w-16 text-right">{bud} GB</span>
+    {fit!=null&&<button onClick={()=>setBud(Math.min(hiG,Math.max(lo,fit)))} className="h-9 px-4 rounded-full border border-line text-xs font-bold uppercase tracking-[.06em] hover:border-ink">Use my hardware ({fit} GB)</button>}</div>
+   <div className="mt-4"><Scatter pts={pts} front={front} best={best} bud={bud}/></div>
+   <div className="flex flex-wrap gap-x-5 gap-y-2 mt-3 text-xs font-semibold">{ups.map(u=><span key={u} className="flex items-center gap-1.5"><svg width="16" height="16" aria-hidden="true"><Mark x={8} y={8} u={u} r={5}/></svg>{u}</span>)}<span className="flex items-center gap-1.5 text-mute"><svg width="22" height="10" aria-hidden="true"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--ink)" strokeDasharray="5 4" strokeWidth="1.5"/></svg>best trade-off line</span></div>
+  </Card>
+  <Card className="p-2 sm:p-3"><TableBox><thead className="bg-soft"><tr><Th>Uploader</Th><Th>Quant</Th><Th r>Bits</Th><Th r>Size</Th><Th r>KLD</Th><Th>Quality</Th>{spec&&<Th r>On your hardware</Th>}</tr></thead>
+   <tbody>{[...all].sort((a,b)=>a.gb-b.gb).map(v=>{const r=spec&&runOn(m,v,spec,32),me=measured(m,v,spec),under=v.gb<=bud;return <tr key={v.repo+v.q} className={`border-t border-line ${under?'':'opacity-50'}`} style={{background:v===best?'color-mix(in srgb, var(--butter) 55%, transparent)':undefined}}>
+    <td className="p-3"><span className="flex items-center gap-2"><svg width="14" height="14" aria-hidden="true"><Mark x={7} y={7} u={v.up} r={4.5}/></svg><span className="font-semibold">{v.up}</span></span></td><td className="p-3 num">{v.q}{front.includes(v)&&<span className="ml-1.5"><Tag>best trade-off</Tag></span>}</td>
+    <td className="p-3 text-right num">{v.bits}</td><td className="p-3 text-right num">{v.gb} GB</td><td className="p-3 text-right num font-semibold">{v.kld}</td>
+    <td className="p-3">{v.kld<=0.01?<Tag tone="mint">near-lossless</Tag>:v.kld<0.05?<Tag>small loss</Tag>:<Tag tone="warn">noticeable loss</Tag>}</td>
+    {spec&&<td className="p-3">{r.where==='no'?<span className="text-xs text-mute">Won't run</span>:<Speed r={r} meas={me}/>}</td>}</tr>})}</tbody></TableBox>
+   <p className="text-xs text-mute p-3">KLD = how far a quant's token probabilities drift from the original BF16 model, measured on the same long, mixed test set for every uploader. {others.length?`Not enough quants to compare yet for ${others.map(x=>x.name).join(', ')}.`:''}</p></Card>
+ </div>;
+}
+
+/* ================= DEVICE TEST ================= */
+const SAMPLE=`{"host":"jignesh-spark","device":"spark","arch":"unified","devices":1,"memory_gb":128,"measured_bw_gbs":251,"fp16_tflops":118,"fp8":true,"backend":"cuda","disk_free_gb":2800,"disk_read_gbs":6.1}`;
+function Probe({onProfile}){
+ const [txt,setTxt]=useState(SAMPLE);const [err,setErr]=useState('');const [cp,setCp]=useState('');const [run,setRun]=useState(false);const [share,setShare]=useState(true);
+ const cmd=share?'npx atlas-probe --bench --share':'npx atlas-probe --bench';
+ const apply=()=>{try{const j=JSON.parse(txt);if(!j.memory_gb)throw 0;setRun(true);setTimeout(()=>onProfile({arch:j.arch||'discrete',gpus:j.devices||1,vram:j.vram_gb||0,gbw:j.measured_bw_gbs,link:'pcie',ram:j.memory_gb,rbw:j.ram_bw_gbs||j.measured_bw_gbs,tf:j.fp16_tflops,fp8:!!j.fp8,be:j.backend||'cuda',disk:j.disk_free_gb,dspd:j.disk_read_gbs,devId:j.device||null},`${j.host}, ${j.memory_gb} GB, ${j.measured_bw_gbs} GB/s measured`),700)}catch(e){setErr('That isn’t an Atlas profile. Paste the JSON the probe prints.')}};
+ const Step=({n,title,children})=><Card className="p-5 sm:p-6"><div className="flex items-center gap-3"><span className="serif text-5xl leading-none text-acc">{n}</span><h3 className="text-lg font-semibold">{title}</h3></div><div className="mt-3">{children}</div></Card>;
+ return <div className="grid lg:grid-cols-3 gap-4 items-start">
+  <Step n="1" title="Choose what to share"><div className="flex items-start gap-3"><button role="switch" aria-checked={share} aria-labelledby="shl" onClick={()=>setShare(!share)} className={`mt-0.5 h-8 w-14 flex-none rounded-full p-1 transition-colors ${share?'bg-acc':'bg-line'}`}><span className="block h-6 w-6 rounded-full bg-card transition-transform duration-300" style={{transform:share?'translateX(24px)':'none'}}/></button>
+   <div><p id="shl" className="font-semibold text-sm">Share speed results</p><p className="text-sm text-mute mt-1">Adds your measured tok/s to the planner for everyone with the same device. Only device model, file and speeds are sent; no hostname or files.</p></div></div>
+   <p className="text-sm mt-4"><span className="serif text-3xl num">{RUNS}</span> <span className="text-mute">runs shared so far across {new Set(MEASURED.map(x=>x.dev)).size} devices</span></p></Step>
+  <Step n="2" title="Run the probe"><div className="flex items-center gap-2 rounded-2xl bg-night text-white p-3"><span className="text-acc"><Ico n="term" on size={18}/></span><code key={cmd} className="fade flex-1 font-mono text-sm break-all">{cmd}</code>
+   <button onClick={()=>navigator.clipboard?.writeText(cmd).then(()=>{setCp('Copied');setTimeout(()=>setCp(''),1400)}).catch(()=>{})} className="h-9 px-3 rounded-full bg-white text-night text-xs font-bold min-w-[4.5rem]">{cp?<span className="pop inline-block">{cp}</span>:'Copy'}</button></div>
+   <p className="text-sm text-mute mt-3">Reads GPU, memory, disk and platform, tests memory bandwidth and compute, then times two small models in llama.cpp. About 2 minutes.</p></Step>
+  <Step n="3" title="Paste the result"><label htmlFor="prof" className="sr-only">Profile JSON</label><textarea id="prof" value={txt} onChange={e=>{setTxt(e.target.value);setErr('')}} rows="5" className="w-full rounded-2xl border border-line bg-soft p-3 font-mono text-xs"/>
+   {err&&<p className="text-warn text-sm font-semibold mt-1">{err}</p>}
+   <div className="mt-3"><Pill acc onClick={apply} disabled={run}>{run?'Reading profile':'See what runs'}</Pill></div><p className="text-xs text-mute mt-2">Pre-filled with a sample DGX Spark profile.</p></Step>
+ </div>;
+}
+
+/* ================= SHELL ================= */
+const VIEWS=[['explorer','Explorer','Every model, every score','Compare closed and open models on intelligence, cost, speed and more.'],['recommend','Recommender','Find your model in five steps','Tell Atlas what matters. It ranks every model against your priorities.'],['hardware','Hardware','What runs on your machine?','Pick devices, type specs, or just describe your setup to Claude.'],['quants','Quants','Which quant should you download?','The same model from different uploaders, compared on size and quality loss.'],['probe','Device test','Measure, then share','Real numbers from your hardware make every estimate better.']];
+function Stars(){const st=useMemo(()=>{let s=7;const r=()=>(s=s*16807%2147483647)/2147483647;return Array.from({length:90},()=>({x:r()*100,y:r()*100,r:r()*1.3+.3,d:r()*3.2,t:r()<.35}))},[]);
+ return <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">{st.map((p,i)=><circle key={i} cx={p.x+'%'} cy={p.y+'%'} r={p.r} fill="#fff" opacity={p.t?undefined:.55} className={p.t?'tw':''} style={p.t?{animationDelay:p.d+'s'}:undefined}/>)}</svg>}
+function App(){
+ const init=()=>{const h=location.hash.slice(1);return VIEWS.some(v=>v[0]===h)?h:'explorer'};
+ const [view,setView]=useState(init);const [sel,setSel]=useState(null);const [qid,setQid]=useState('q3827');
+ const [mode,setMode]=useState('pick');const [picks,setPicks]=useState({spark:1});const [host,setHost]=useState({ram:64,rbw:90,disk:2000,dspd:5});
+ const [manual,setManual]=useState(BLANK);const [aiSpec,setAiSpec]=useState(null);const [profile,setProfile]=useState('');
+ useEffect(()=>{const f=()=>setView(init());addEventListener('hashchange',f);return()=>removeEventListener('hashchange',f)},[]);
+ const go=v=>{location.hash=v;setView(v);scrollTo({top:0,behavior:'smooth'})};
+ const spec=mode==='manual'?manual:mode==='ai'?aiSpec:specFromPicks(picks,host);
+ const toQuants=id=>{setQid(id);setSel(null);go('quants')};
+ const V0=VIEWS.find(v=>v[0]===view);
+ return <div className="min-h-screen">
+  <div className="hero relative text-white overflow-hidden">
+   <Stars/>
+   <div className="relative max-w-[1240px] mx-auto px-4 sm:px-6">
+    
+    <header className="flex items-center gap-4 h-16 pt-2">
+     <a href="#explorer" aria-label="Atlas home" onClick={e=>{e.preventDefault();go('explorer')}} className="flex items-center flex-none"><Wordmark/></a>
+     <nav className="scroll nobar edge flex-1" aria-label="Sections"><div className="flex gap-1 w-max mx-auto">{VIEWS.map(([k,l])=><a key={k} href={'#'+k} onClick={e=>{e.preventDefault();go(k)}} aria-current={view===k?'page':undefined} className={`relative h-10 px-3 flex items-center text-xs font-semibold uppercase tracking-[.08em] rounded-full transition-colors ${view===k?'text-white':'text-white/65 hover:text-white'}`}>{l}{view===k&&<span className="pop absolute left-1/2 -ml-[3px] bottom-0.5 h-1.5 w-1.5 rounded-full bg-acc"/>}</a>)}</div></nav>
+     <div className="hidden md:block flex-none"><Pill dark small onClick={()=>{setMode('ai');go('hardware')}}>Ask AI</Pill></div>
+    </header>
+    <div key={view} className="text-center pt-12 sm:pt-16 pb-36 sm:pb-44">
+     <h1 className="fade text-[clamp(36px,6vw,72px)] font-semibold tracking-[-.03em] leading-[1.02] [text-wrap:balance] max-w-4xl mx-auto">{view==='explorer'?<>Find the right model.<br/>Run it on your hardware.</>:V0[2]}</h1>
+     <p className="fade text-white/70 mt-4 max-w-xl mx-auto" style={{animationDelay:'80ms'}}>{V0[3]}</p>
+     {view==='explorer'&&<div className="fade mt-12 grid grid-cols-2 lg:grid-cols-4 text-left border-t border-white/15" style={{animationDelay:'160ms'}}>{VIEWS.slice(1).map(([k,l,t],i)=><button key={k} onClick={()=>go(k)} className={`lift flex items-center gap-3 p-4 sm:p-5 hover:bg-white/5 transition-colors ${i?'lg:border-l border-white/15':''} ${i%2?'border-l border-white/15 lg:border-l':''}`}><Gem k={k}/><span className="flex-1"><span className="block font-semibold text-sm">{l}</span><span className="block text-xs text-white/60 mt-0.5 leading-snug">{t}</span></span><span className="arr text-white/80"><Ico n="arrow" size={18}/></span></button>)}</div>}
+    </div>
+   </div>
+  </div>
+  <div className="after">
+   <main key={view} className="fade relative max-w-[1240px] mx-auto px-3 sm:px-6 -mt-28 sm:-mt-32 pb-16">
+    {view==='explorer'&&<Explorer open={setSel}/>}
+    {view==='recommend'&&<Recommender open={setSel}/>}
+    {view==='hardware'&&<Planner {...{mode,setMode,picks,setPicks,manual,setManual,host,setHost,spec,setAiSpec,profile,toQuants}} open={setSel}/>}
+    {view==='quants'&&<Quants {...{qid,setQid,spec}} open={setSel}/>}
+    {view==='probe'&&<Probe onProfile={(s,p)=>{setManual(s);setMode('manual');setProfile(p);go('hardware')}}/>}
+   </main>
+  </div>
+  <footer className="bg-night text-white/80"><div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
+   <div><div className="text-white"><Wordmark size={34}/></div><p className="mt-2 text-white/60">A personal map of AI models: scores, prices, quants and the hardware to run them.</p></div>
+   <div><div className="serif text-2xl text-white">Explore</div><ul className="mt-3 space-y-2">{VIEWS.map(([k,l])=><li key={k}><a href={'#'+k} onClick={e=>{e.preventDefault();go(k)}} className="hover:text-white">{l}</a></li>)}</ul></div>
+   <div><div className="serif text-2xl text-white">Data</div><ul className="mt-3 space-y-2 text-white/60">{SOURCES.map(s=><li key={s.k}>{s.name} · {s.synced}</li>)}<li>Hugging Face · 1h ago</li></ul></div>
+   <div><div className="serif text-2xl text-white">Notes</div><p className="mt-3 text-white/60">Benchmarks from <a className="underline" href="https://artificialanalysis.ai/">Artificial Analysis</a> and others. All values in this prototype are sample data; device specs are approximate.</p></div>
+  </div></footer>
+  {sel&&<Detail m={sel} close={()=>setSel(null)} spec={spec} toQuants={toQuants}/>}
+ </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+}
+</script>
+</body>
+</html>
