@@ -13,6 +13,17 @@ export function toFileRow(r: Row): FileRow {
   };
 }
 
+/** Number of files (all models). Cheap: the Explorer stat tile needs only this. */
+export const loadFileCount = cache(async (): Promise<number> => {
+  const rows = await withFallback('v_files count', async () => {
+    const { supabaseServer } = await import('@/lib/supabase/server');
+    const { count, error } = await supabaseServer().from('files').select('id', { count: 'exact', head: true });
+    if (error) throw new Error(error.message);
+    return count ? [count] : [];
+  }, () => [SAMPLE_FILES.length], true);
+  return rows[0] ?? 0;
+});
+
 /** All files, or only one model's files. */
 export const loadFiles = cache((modelId?: string): Promise<FileRow[]> =>
   withFallback('v_files', async () => (await selectAll('v_files', '*', modelId ? q => q.eq('model_id', modelId) : undefined)).map(toFileRow),
