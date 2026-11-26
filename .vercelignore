@@ -1,0 +1,9 @@
+# never upload local secrets or tooling
+.env
+.env.*
+!.env.example
+.claude
+.next
+node_modules
+cli/node_modules
+cli/dist

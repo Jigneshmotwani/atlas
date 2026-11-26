@@ -1,11 +1,33 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": [
+    "sin1"
+  ],
   "crons": [
-    { "path": "/api/cron/openrouter", "schedule": "0 17 * * *" },
-    { "path": "/api/cron/aa", "schedule": "0 18 * * *" },
-    { "path": "/api/cron/arena", "schedule": "0 19 * * *" },
-    { "path": "/api/cron/livebench", "schedule": "0 20 * * *" },
-    { "path": "/api/cron/epoch", "schedule": "0 21 * * *" },
-    { "path": "/api/cron/calibrate", "schedule": "0 22 * * *" }
+    {
+      "path": "/api/cron/openrouter",
+      "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/aa",
+      "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/arena",
+      "schedule": "0 19 * * *"
+    },
+    {
+      "path": "/api/cron/livebench",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/epoch",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/calibrate",
+      "schedule": "0 22 * * *"
+    }
   ]
 }

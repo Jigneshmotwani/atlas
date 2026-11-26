@@ -7,7 +7,7 @@ export const PROBE_VERSION = '1.0.0';
 
 /** Where `--share` posts when neither ATLAS_URL nor --url is given.
  *  Placeholder until the production URL is known; set it before `npm publish`. */
-export const DEFAULT_URL = 'https://atlas.example.invalid';
+export const DEFAULT_URL = 'https://atlas-beta-jig.vercel.app';
 export const isPlaceholderUrl = (u: string) => /\.invalid(?::\d+)?\/?$/i.test(u.replace(/\/+$/, ''));
 
 /** Ask before any single download larger than this. */

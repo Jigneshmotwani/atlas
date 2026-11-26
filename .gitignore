@@ -43,3 +43,5 @@ next-env.d.ts
 # local env (never commit)
 .env.local
 !.env.example
+
+.vercel

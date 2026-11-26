@@ -18,8 +18,8 @@ Usage: npx atlas-probe [options]
   --bench                  Also download 2 small reference GGUFs once (cached in ${CACHE_LABEL})
                            and time them with your llama-bench
   --model <repo>:<quant>   Also benchmark that Hugging Face GGUF (asks before downloads over 5 GB)
-  --share                  POST the profile to \${ATLAS_URL or --url}/api/runs
-  --url <https://...>      Atlas site to share with (ATLAS_URL takes precedence)
+  --share                  POST the profile to \${--url or ATLAS_URL or the Atlas site}/api/runs
+  --url <https://...>      Atlas site to share with (wins over ATLAS_URL)
   --json                   Print only the JSON (for piping)
   -h, --help               Show this help
   -v, --version            Print the version

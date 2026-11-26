@@ -4,7 +4,7 @@ import { DEFAULT_URL, PROBE_VERSION, isPlaceholderUrl } from './config.js';
 import type { Profile } from './profile.js';
 
 /** Base URL: ATLAS_URL, then --url, then the built-in default. */
-export const shareBase = (flagUrl: string | undefined) => (process.env.ATLAS_URL || flagUrl || DEFAULT_URL).replace(/\/+$/, '');
+export const shareBase = (flagUrl: string | undefined) => (flagUrl || process.env.ATLAS_URL || DEFAULT_URL).replace(/\/+$/, '');
 
 export interface ShareResult { accepted: number; rejected: { file: string; reason: string }[] }
 
