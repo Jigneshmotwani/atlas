@@ -1,4 +1,4 @@
-// scripts/import-kld.ts — upsert data/kld/*.csv (repo,quant,kld,eval_set,source,source_ref) into file_quality (W4).
+// scripts/import-kld.ts — upsert data/kld/*.csv (repo,quant,kld,eval_set,source,source_ref[,size_gb]) into file_quality (W4).
 //   pnpm exec tsx scripts/import-kld.ts [--dry]
 // Resolves repo + quant → files.id (exact quant, then case-insensitive); unresolved rows are listed, not inserted
 // (run hf-sync first so the files exist).
@@ -19,13 +19,16 @@ async function main() {
   if (!valid.length) return;
   const db = supabaseAdmin();
   const repos = [...new Set(valid.map(r => r.repo))];
-  const { data, error } = await db.from('files').select('id,repo,quant').in('repo', repos);
+  const { data, error } = await db.from('files').select('id,repo,quant,size_gb').in('repo', repos);
   if (error) throw new Error(`files: ${error.message}`);
-  const files = (data ?? []) as { id: number; repo: string; quant: string }[];
+  const files = (data ?? []) as { id: number; repo: string; quant: string; size_gb: number }[];
   const out: Record<string, unknown>[] = [], missing: string[] = [];
   for (const r of valid) {
     const f = files.find(x => x.repo === r.repo && x.quant === r.quant) ?? files.find(x => x.repo.toLowerCase() === r.repo.toLowerCase() && x.quant.toLowerCase() === r.quant.toLowerCase());
     if (!f) { missing.push(`${r.file}: ${r.repo}:${r.quant}`); continue; }
+    // optional size_gb column (size printed in the source table): the stored file must be within 3 %, or the row belongs to another build
+    const want = num(r.size_gb);
+    if (want != null && Math.abs(Number(f.size_gb) - want) / want > 0.03) { missing.push(`${r.file}: ${r.repo}:${r.quant} is ${f.size_gb} GB, table says ${want} GB`); continue; }
     out.push({ file_id: f.id, kld: num(r.kld), eval_set: r.eval_set, source: r.source, source_ref: r.source_ref || null, measured_at: new Date().toISOString() });
   }
   const uniq = [...new Map(out.map(o => [`${o.file_id}|${o.eval_set}|${o.source}`, o])).values()];

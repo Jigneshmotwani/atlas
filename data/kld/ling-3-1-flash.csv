@@ -1,0 +1,18 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+AtomicChat/Ling-3.1-flash-GGUF,Q8_0,0.00503,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),600.85
+AtomicChat/Ling-3.1-flash-GGUF,Q6_K,0.00557,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),477.98
+AtomicChat/Ling-3.1-flash-GGUF,Q5_K_M,0.00766,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),400.24
+AtomicChat/Ling-3.1-flash-GGUF,Q4_K_M,0.01114,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),354.39
+AtomicChat/Ling-3.1-flash-GGUF,IQ4_XS,0.01212,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),337.85
+AtomicChat/Ling-3.1-flash-GGUF,IQ4_XXS,0.01391,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),311.42
+AtomicChat/Ling-3.1-flash-GGUF,IQ3_M,0.02564,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),277.07
+AtomicChat/Ling-3.1-flash-GGUF,IQ3_XXS,0.03436,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),256.39
+AtomicChat/Ling-3.1-flash-GGUF,IQ2_M,0.05927,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),218.08
+AtomicChat/Ling-3.1-flash-GGUF,IQ2_XS,0.07972,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),198.22
+AtomicChat/Ling-3.1-flash-GGUF,IQ2_XXS,0.11133,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),174.14
+AtomicChat/Ling-3.1-flash-GGUF,IQ1_M,0.16597,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),160.93
+AtomicChat/Ling-3.1-flash-GGUF,IQ1_S,0.20448,atomicchat-ling3-moe-4096,atomicchat,https://huggingface.co/AtomicChat/Ling-3.1-flash-GGUF (model card KLD table),141.81
+vultr/Ling-3.1-flash-GGUF,Q5_K_M,0.0127,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.1-flash-GGUF (model card KLD table),439.69
+vultr/Ling-3.1-flash-GGUF,Q4_K_M,0.0228,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.1-flash-GGUF (model card KLD table),374.12
+vultr/Ling-3.1-flash-GGUF,IQ3_M,0.0816,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.1-flash-GGUF (model card KLD table),270.02
+vultr/Ling-3.1-flash-GGUF,IQ3_S,0.0932,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.1-flash-GGUF (model card KLD table),267.37

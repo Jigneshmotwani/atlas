@@ -1,0 +1,4 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF,MXFP4,0.0107,vultr-card,vultr,https://huggingface.co/vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF (model card KLD table),154.99
+vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF,IQ3_M,0.1095,vultr-card,vultr,https://huggingface.co/vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF (model card KLD table),136.11
+vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF,IQ3_S,0.1111,vultr-card,vultr,https://huggingface.co/vultr/DeepSeek-V4-Flash-Vision-Exp-GGUF (model card KLD table),134.68

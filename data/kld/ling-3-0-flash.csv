@@ -1,0 +1,5 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+prometheusAIR/Ling-3.0-flash-GGUF,Q4_K_M,0.015854,prometheusair-card,prometheusair,https://huggingface.co/prometheusAIR/Ling-3.0-flash-GGUF (model card KLD table),74.84
+prometheusAIR/Ling-3.0-flash-GGUF,Q5_K_M,0.007082,prometheusair-card,prometheusair,https://huggingface.co/prometheusAIR/Ling-3.0-flash-GGUF (model card KLD table),90.39
+prometheusAIR/Ling-3.0-flash-GGUF,Q5_K_XL,0.005726,prometheusair-card,prometheusair,https://huggingface.co/prometheusAIR/Ling-3.0-flash-GGUF (model card KLD table),95.47
+prometheusAIR/Ling-3.0-flash-GGUF,Q5_K_XXL,0.005069,prometheusair-card,prometheusair,https://huggingface.co/prometheusAIR/Ling-3.0-flash-GGUF (model card KLD table),99.62

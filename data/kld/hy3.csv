@@ -1,0 +1,5 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+vultr/Hy3-GGUF,Q5_K_M,0.0187,vultr-card,vultr,https://huggingface.co/vultr/Hy3-GGUF (model card KLD table),230.25
+vultr/Hy3-GGUF,Q4_K_M,0.0315,vultr-card,vultr,https://huggingface.co/vultr/Hy3-GGUF (model card KLD table),196.34
+vultr/Hy3-GGUF,IQ3_M,0.1307,vultr-card,vultr,https://huggingface.co/vultr/Hy3-GGUF (model card KLD table),141.93
+vultr/Hy3-GGUF,IQ3_S,0.1596,vultr-card,vultr,https://huggingface.co/vultr/Hy3-GGUF (model card KLD table),139.94

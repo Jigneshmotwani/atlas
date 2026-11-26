@@ -1,0 +1,16 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+AtomicChat/Inkling-2-Mini-GGUF,Q8_0,0.0033,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),27.74
+AtomicChat/Inkling-2-Mini-GGUF,Q6_K,0.0047,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),23.4
+AtomicChat/Inkling-2-Mini-GGUF,Q5_K_M,0.0079,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),19.81
+AtomicChat/Inkling-2-Mini-GGUF,Q5_K,0.0052,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),19.07
+AtomicChat/Inkling-2-Mini-GGUF,Q4_K_M,0.0165,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),17.38
+AtomicChat/Inkling-2-Mini-GGUF,Q4_K,0.008,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),16.53
+AtomicChat/Inkling-2-Mini-GGUF,IQ4_XS,0.0101,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),15
+AtomicChat/Inkling-2-Mini-GGUF,IQ3_S,0.0205,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),13.34
+AtomicChat/Inkling-2-Mini-GGUF,IQ3_XXS,0.0271,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),12.58
+AtomicChat/Inkling-2-Mini-GGUF,IQ2_S,0.047,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),11.56
+AtomicChat/Inkling-2-Mini-GGUF,IQ2_XXS,0.084,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),10.43
+AtomicChat/Inkling-2-Mini-GGUF,IQ2_M,0.13,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),8.67
+AtomicChat/Inkling-2-Mini-GGUF,Q2,0.158,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),7.9
+AtomicChat/Inkling-2-Mini-GGUF,IQ1_M,0.236,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),7.26
+AtomicChat/Inkling-2-Mini-GGUF,IQ1_S,0.278,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Inkling-2-Mini-GGUF (model card KLD table),6.88

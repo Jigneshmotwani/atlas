@@ -1,0 +1,12 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+AtomicChat/LFM3-1.7B-GGUF,Q8_0,0.004,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),1.85
+AtomicChat/LFM3-1.7B-GGUF,Q6_K,0.01,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),1.59
+AtomicChat/LFM3-1.7B-GGUF,Q5_K_M,0.034,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),1.31
+AtomicChat/LFM3-1.7B-GGUF,Q4_K_M,0.087,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),1.13
+AtomicChat/LFM3-1.7B-GGUF,IQ4_XS,0.105,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),1.09
+AtomicChat/LFM3-1.7B-GGUF,IQ3_S,0.203,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/LFM3-1.7B-GGUF (model card KLD table),0.92
+turintech/LFM3-1.7B-Artemis-GGUF,Q4_K_M,0.05109,turintech-rtx5090-2026-11-05-wiki,turintech,https://huggingface.co/turintech/LFM3-1.7B-Artemis-GGUF (model card KLD table),1.1
+bartowski/LFM3-1.7B-GGUF,Q4_K_M,0.063742,turintech-rtx5090-2026-11-05-wiki,turintech,https://huggingface.co/turintech/LFM3-1.7B-Artemis-GGUF (model card KLD table),1.12
+bartowski/LFM3-1.7B-GGUF,Q4_K_S,0.088935,turintech-rtx5090-2026-11-05-wiki,turintech,https://huggingface.co/turintech/LFM3-1.7B-Artemis-GGUF (model card KLD table),1.05
+bartowski/LFM3-1.7B-GGUF,IQ4_XS,0.148104,turintech-rtx5090-2026-11-05-wiki,turintech,https://huggingface.co/turintech/LFM3-1.7B-Artemis-GGUF (model card KLD table),1
+LiquidAI/LFM3-1.7B-GGUF,Q4_K_M,0.119185,turintech-rtx5090-2026-11-05-wiki,turintech,https://huggingface.co/turintech/LFM3-1.7B-Artemis-GGUF (model card KLD table),1.1

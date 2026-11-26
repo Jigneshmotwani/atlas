@@ -1,0 +1,5 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+vultr/Ling-3.0-flash-VL-GGUF,Q5_K_M,0.0763,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.0-flash-VL-GGUF (model card KLD table),97.15
+vultr/Ling-3.0-flash-VL-GGUF,Q4_K_M,0.1391,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.0-flash-VL-GGUF (model card KLD table),82.78
+vultr/Ling-3.0-flash-VL-GGUF,IQ3_M,0.2962,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.0-flash-VL-GGUF (model card KLD table),59.74
+vultr/Ling-3.0-flash-VL-GGUF,IQ3_S,0.3233,vultr-card,vultr,https://huggingface.co/vultr/Ling-3.0-flash-VL-GGUF (model card KLD table),59.18

@@ -67,9 +67,11 @@ function View({ m, evalSet, files, qm, spec, budRaw, setBud, runStats, eta, foot
   const all = useMemo(() => files.filter(f => f.kind === 'quant').sort((a, b) => a.sizeGb - b.sizeGb), [files]);
   const k = (f: FileRow) => kldIn(f, evalSet);
   const rated = all.filter(f => (k(f) ?? 0) > 0);
-  const lo = Math.floor(Math.min(...rated.map(f => f.sizeGb))), hi = Math.ceil(Math.max(...rated.map(f => f.sizeGb)));
-  const clampB = (v: number) => Math.min(hi, Math.max(lo, v));
   const fit = spec ? Math.floor(fastMemoryGb(spec) - kvBytes(m) * 32000 / 2 ** 30 - 1.5) : null;
+  // slider spans the rated files, stretched to reach the saved hardware's budget (more than every file, or less than the smallest)
+  const sizes = rated.map(f => f.sizeGb);
+  const lo = Math.max(0, Math.floor(Math.min(...sizes, fit ?? Infinity))), hi = Math.ceil(Math.max(...sizes, fit ?? 0));
+  const clampB = (v: number) => Math.min(hi, Math.max(lo, v));
   const bud = clampB(budRaw ?? fit ?? Math.round((lo + hi) / 2));
 
   const view = useMemo(() => quantView(files, evalSet, bud), [files, evalSet, bud]);

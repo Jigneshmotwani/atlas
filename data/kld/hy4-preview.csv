@@ -1,0 +1,4 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+6block/Hy4-preview-GGUF,IQ4_XS,0.0793,6block-wikitext2,6block,https://huggingface.co/6block/Hy4-preview-GGUF (model card KLD table),416.97
+6block/Hy4-preview-GGUF,Q2_K,0.3451,6block-wikitext2,6block,https://huggingface.co/6block/Hy4-preview-GGUF (model card KLD table),289.54
+6block/Hy4-preview-GGUF,IQ2_XS,0.5988,6block-wikitext2,6block,https://huggingface.co/6block/Hy4-preview-GGUF (model card KLD table),235.11

@@ -1,0 +1,2 @@
+repo,quant,kld,eval_set,source,source_ref,size_gb
+AtomicChat/Hy4-flash-GGUF,IQ2_XXS,0.725,atomicchat-neutral30-4096,atomicchat,https://huggingface.co/AtomicChat/Hy4-flash-GGUF (model card KLD table),84.7
