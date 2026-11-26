@@ -31,3 +31,9 @@ export function deviceMatchesQuery(query: string, names: string[]): boolean {
   if (!words.length) return false;
   return names.some(n => { const c = ` ${canonicalDeviceName(n)} ${n.toLowerCase()} `; return words.every(w => c.includes(w)); });
 }
+
+/** The alias that made `query` match when the catalog name alone does not (e.g. "dell pro max" → "Dell Pro Max with GB300"). */
+export function matchedAlias(query: string, name: string, aliases: string[]): string | null {
+  if (!query.trim() || deviceMatchesQuery(query, [name])) return null;
+  return aliases.find(a => deviceMatchesQuery(query, [a])) ?? null;
+}

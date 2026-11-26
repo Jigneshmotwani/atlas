@@ -3,7 +3,8 @@
 // For every model with hf_repo: params + KV bytes from safetensors / config.json, the official file, and the files of the
 // top-8 uploaders' quantized / fine-tuned derivatives. 5 requests/s, stops at 9 min and resumes next day from a cursor
 // stored as JSON in ingest_log.error (source 'hf-sync').
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { config } from 'dotenv';
 
 if (existsSync('.env.local')) config({ path: '.env.local', quiet: true });
@@ -29,6 +30,12 @@ function weightBytes(tree: TreeEntry[]): number {
   return (root.length ? root : st).reduce((a, e) => a + fileSize(e), 0);
 }
 interface Listed { id: string; downloads?: number; tags?: string[]; lastModified?: string }
+/** HF repos listed in data/kld/<model id>.csv (first column), so files with published KLD are always synced. */
+function kldRepos(modelId: string): string[] {
+  const p = join(process.cwd(), 'data', 'kld', `${modelId}.csv`);
+  if (!existsSync(p)) return [];
+  return [...new Set(readFileSync(p, 'utf8').split(/\r?\n/).slice(1).map(l => l.split(',')[0].trim()).filter(r => /^[\w.-]+\/[\w.-]+$/.test(r)))];
+}
 
 const args = process.argv.slice(2);
 const flag = (n: string) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined; };
@@ -202,6 +209,15 @@ async function syncModel(m: { id: string; hf_repo: string }) {
     perUploader.set(u, (perUploader.get(u) ?? 0) + 1);
     const tags = d.tags ?? [];
     files.push(...await filesOfRepo(m.id, d.id, kindOf(d.id, tags, d.base), d.downloads ?? null, d.lastModified ?? null, total, tags));
+  }
+  // step 3b: repos named in data/kld/<model id>.csv, even outside the top uploaders, so their KLD rows resolve (W1, after launch)
+  const synced = new Set(files.map(f => f.repo));
+  for (const pr of kldRepos(m.id)) {
+    if (synced.has(pr) || pr === repo) continue;
+    const d = await hf<Listed>(`/api/models/${pr}?expand[]=downloads&expand[]=tags&expand[]=lastModified`);
+    if (!d) { console.log(`  ${m.id}: KLD repo ${pr} not found`); continue; }
+    const tags = d.tags ?? [];
+    files.push(...await filesOfRepo(m.id, pr, kindOf(pr, tags, 'quant'), d.downloads ?? null, d.lastModified ?? null, total, tags));
   }
   return { model: { total_params_b: total ? r2(total / 1e9) : null, active_params_b: active ? r2(active / 1e9) : null, kv_bytes_per_token: kv }, files, note: null as string | null };
 }

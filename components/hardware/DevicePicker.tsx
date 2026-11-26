@@ -1,7 +1,7 @@
 'use client';
 // components/hardware/DevicePicker.tsx — "Pick devices" tab: catalog search, category chips, quantities, host PC. Owned by W7.
 import { useMemo, useState } from 'react';
-import { deviceMatchesQuery } from '@/lib/device-names';
+import { deviceMatchesQuery, matchedAlias } from '@/lib/device-names';
 import type { Device, HardwareSpec, HostPc, SetupPick } from '@/lib/contracts';
 import { Icon } from '@/components/ui';
 
@@ -59,10 +59,12 @@ export function DevicePicker({ devices, aliases, picks, setPicks, host, setHost,
       <ul className="max-h-80 overflow-y-auto divide-y divide-line -mx-1 px-1">
         {list.slice(0, SHOW_MAX).map(d => {
           const n = qty(d.id);
+          const via = matchedAlias(q, d.name, aliases[d.id] ?? []);
           return (
             <li key={d.id} className="flex items-center justify-between gap-2 py-2.5">
               <div>
                 <div className="text-sm font-semibold">{d.name}</div>
+                {via && <div className="text-xs text-mute">Matches {via}</div>}
                 <div className="text-xs text-mute num">{d.memGb} GB {d.type === 'unified' ? 'unified' : d.type === 'cpu' ? 'RAM' : 'VRAM'} · {d.bwGbs} GB/s</div>
               </div>
               {n > 0 ? (
