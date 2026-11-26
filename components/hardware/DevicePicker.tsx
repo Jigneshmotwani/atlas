@@ -18,16 +18,23 @@ export interface DevicePickerProps {
   onFineTune(): void;
 }
 
+const CATEGORY_ORDER = ['AI box', 'Mac', 'GPU', 'Workstation GPU', 'Data center', 'Laptop GPU'];
+
 export function DevicePicker({ devices, aliases, picks, setPicks, host, setHost, spec, onFineTune }: DevicePickerProps) {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('All');
-  const cats = useMemo(() => [...new Set(devices.map(d => d.category))], [devices]);
+  // prototype order: AI box, Mac, GPU, Workstation GPU, Data center, Laptop GPU, then any others; verified first, natural name order inside
+  const sorted = useMemo(() => {
+    const rank = (c: string) => { const i = CATEGORY_ORDER.indexOf(c); return i < 0 ? CATEGORY_ORDER.length : i; };
+    return [...devices].sort((a, b) => Number(b.verified) - Number(a.verified) || rank(a.category) - rank(b.category) || a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }, [devices]);
+  const cats = useMemo(() => [...new Set(sorted.map(d => d.category))], [sorted]);
   const qty = (id: string) => picks.find(p => p.deviceId === id)?.qty ?? 0;
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return devices.filter(d => (cat === 'All' || d.category === cat)
+    return sorted.filter(d => (cat === 'All' || d.category === cat)
       && (!s || d.name.toLowerCase().includes(s) || (aliases[d.id] ?? []).some(a => a.toLowerCase().includes(s))));
-  }, [devices, aliases, q, cat]);
+  }, [sorted, aliases, q, cat]);
   const step = (id: string, dv: number) => {
     const n = Math.max(0, qty(id) + dv);
     const rest = picks.filter(p => p.deviceId !== id);

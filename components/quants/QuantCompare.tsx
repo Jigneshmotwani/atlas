@@ -29,16 +29,17 @@ export function QuantCompare({ models, files, runStats, eta }: QuantData) {
     return m;
   }, [files]);
   const { qm, others } = useMemo(() => {
-    const qm: { m: ModelRow; evalSet: string }[] = [], others: ModelRow[] = [];
+    const qm: { m: ModelRow; evalSet: string; count: number }[] = [], others: ModelRow[] = [];
     for (const m of models) {
       const b = bestEvalSet(filesBy.get(m.id) ?? []);
-      if (b.evalSet && b.count >= MIN_RATED_QUANTS) qm.push({ m, evalSet: b.evalSet }); else if (m.openWeights) others.push(m);
+      if (b.evalSet && b.count >= MIN_RATED_QUANTS) qm.push({ m, evalSet: b.evalSet, count: b.count }); else if (m.openWeights) others.push(m);
     }
     return { qm, others };
   }, [models, filesBy]);
 
   const [budRaw, setBud] = useState<number | null>(null);
-  const sel = qm.find(x => x.m.id === params.get('model')) ?? qm[0];
+  // no ?model= → the model with the most rated quants (prototype opens on Qwen3.8-27B)
+  const sel = qm.find(x => x.m.id === params.get('model')) ?? [...qm].sort((a, b) => b.count - a.count)[0];
   const othersNote = others.length
     ? `Not enough quants to compare yet for ${others.slice(0, NAMES_MAX).map(x => x.name).join(', ')}${others.length > NAMES_MAX ? ` and ${others.length - NAMES_MAX} more` : ''}.`
     : '';
