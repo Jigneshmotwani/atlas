@@ -1,26 +1,153 @@
+/* Atlas design system (W2). Tokens, Tailwind v4 theme mapping and every utility class
+   from design/prototype.html with the same names.
+   Layering matters in Tailwind v4: unlayered rules beat utilities, so element rules live in
+   @layer base and the prototype's named classes in @layer components (utilities still win). */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* `dark:` follows data-theme when set, otherwise the OS */
+@custom-variant dark {
+  &:where([data-theme=dark], [data-theme=dark] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme=light]), :root:not([data-theme=light]) *) {
+      @slot;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#eef2f6, #0a101b);
+  --card: light-dark(#ffffff, #111a28);
+  --soft: light-dark(#f5f7fa, #0e1624);
+  --ink: light-dark(#0f1726, #eef2f8);
+  --mute: light-dark(#566275, #9fadc0);
+  --line: light-dark(#e1e6ee, #223047);
+  --acc: #F47321;
+  --butter: #FFEEB3;
+  --mint: #B4D7CD;
+  --steel: #8EA8C3;
+  --night: #0b1220;
+  --onacc: #0f1726;
+  --warn: light-dark(#b2470a, #ffa36b);
+  --fade: light-dark(#8EA8C3, #1a2b48);
 }
+:root[data-theme=light] { color-scheme: light; }
+:root[data-theme=dark] { color-scheme: dark; }
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-soft: var(--soft);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-acc: var(--acc);
+  --color-butter: var(--butter);
+  --color-mint: var(--mint);
+  --color-steel: var(--steel);
+  --color-night: var(--night);
+  --color-onacc: var(--onacc);
+  --color-warn: var(--warn);
+  --color-fade: var(--fade);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+}
+
+@layer base {
+  *, ::before, ::after { box-sizing: border-box; min-width: 0; border-color: var(--line); }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 var(--font-inter), system-ui, sans-serif;
+    overflow-x: clip;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button:not(:disabled), [role=button]:not(:disabled), summary { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 10px; }
+  table { border-collapse: collapse; }
+
+  /* scrollbars: thin steel pill, orange when you reach for it */
+  * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--steel) 80%, transparent) transparent; }
+  .scroll:hover, ul:hover, textarea:hover, .overflow-y-auto:hover { scrollbar-color: var(--acc) transparent; }
+  html { scrollbar-color: color-mix(in srgb, var(--steel) 85%, transparent) var(--bg); }
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--steel) 80%, transparent);
+      border-radius: 999px; border: 3px solid transparent; background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--acc); background-clip: padding-box; }
+    ::-webkit-scrollbar-corner { background: transparent; }
+  }
+
+  @media (max-width: 600px) {
+    table { font-size: 13px; }
+    th, td { padding: 7px 6px !important; }
+  }
+
+  /* everything still, including Tailwind transitions and Motion-free CSS animations */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .serif { font-family: var(--font-instrument-serif), Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+  .scroll { overflow-x: auto; }
+  .hero {
+    background:
+      radial-gradient(900px 420px at 50% -8%, #1e3566 0%, transparent 65%),
+      linear-gradient(180deg, #0b1220 0%, #0e1a33 52%, #243f72 80%, var(--fade) 100%);
+  }
+  .after { background: linear-gradient(180deg, var(--fade) 0, var(--bg) 340px); }
+  .tw { animation: tw 3.2s ease-in-out infinite; }
+  .fade { animation: fade .4s cubic-bezier(.2, .8, .2, 1) both; }
+  .slide { animation: slide .45s cubic-bezier(.2, .8, .2, 1) both; }
+  .pop { animation: pop .45s cubic-bezier(.34, 1.56, .64, 1) both; }
+  .bar { transform-origin: left; animation: grow .7s cubic-bezier(.2, .8, .2, 1) both; }
+  .trk { transition: width .5s cubic-bezier(.34, 1.56, .64, 1); }
+  .gem { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+  .lift:hover .gem { transform: translateY(-4px) rotate(-8deg) scale(1.08); }
+  .arr { transition: transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+  .lift:hover .arr { transform: translate(3px, -3px); }
+  .ico path, .ico circle, .ico rect, .ico line, .ico polyline { stroke-dasharray: 80; stroke-dashoffset: 0; }
+  .ico.on path, .ico.on circle, .ico.on rect, .ico.on line, .ico.on polyline { animation: draw .7s ease-out; }
+  .pick { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background .2s, border-color .2s; }
+  .pick:hover { transform: translateY(-2px); }
+  .dot { animation: dot 1s ease-in-out infinite; }
+  .spin { animation: spin 1s linear infinite; }
+  .nobar { scrollbar-width: none; }
+  .nobar::-webkit-scrollbar { display: none; }
+  .edge {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent);
+  }
+  .ticks { transform-origin: 32px 32px; transition: transform .8s cubic-bezier(.34, 1.56, .64, 1); }
+  .logo:hover .ticks { transform: rotate(30deg); }
+  .star { transform-origin: 32px 32px; transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+  .logo:hover .star { transform: scale(1.25); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tw, .fade, .slide, .pop, .bar, .ico.on *, .dot, .spin { animation: none !important; }
+    .trk, .gem, .arr, .pick, .ticks, .star { transition: none !important; }
+    .lift:hover .gem, .lift:hover .arr, .pick:hover, .logo:hover .ticks, .logo:hover .star { transform: none; }
+  }
+}
+
+@keyframes tw { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes slide { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(.6); opacity: .2; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes draw { from { stroke-dashoffset: 80; } }
+@keyframes dot { 0%, 100% { opacity: .3; transform: none; } 50% { opacity: 1; transform: translateY(-4px); } }
+@keyframes spin { to { transform: rotate(360deg); } }
