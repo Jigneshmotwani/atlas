@@ -28,7 +28,7 @@ export const loadRunStats = cache((): Promise<RunStat[]> =>
   withFallback('v_run_stats', async () => (await selectAll('v_run_stats')).filter(r => r.device_id != null && r.file_id != null).map((r): RunStat => ({
     deviceId: String(r.device_id), fileId: Number(r.file_id), runtime: String(r.runtime), nRuns: Number(r.n_runs), genP50: Number(r.gen_p50), genP25: Number(r.gen_p25),
     genP75: Number(r.gen_p75), promptP50: num(r.prompt_p50), anyVerified: !!r.any_verified, lastRun: String(r.last_run),
-  })), () => SAMPLE_RUN_STATS, true));
+  })), () => SAMPLE_RUN_STATS)); // empty view = no shared runs yet; never show sample runs against real file ids
 
 /** Fitted efficiency factors (empty until 20+ runs exist per group). */
 export const loadEta = cache((): Promise<EtaCalibration[]> =>
