@@ -17,6 +17,9 @@ type Json = Record<string, unknown>;
 type FileFormat = 'gguf' | 'bf16' | 'fp16' | 'fp8' | 'int4' | 'mlx' | 'awq' | 'gptq';
 type FileKind = 'official' | 'quant' | 'finetune' | 'abliterated' | 'merge';
 interface FileOut { model_id: string; repo: string; uploader: string; quant: string; format: FileFormat; bits_per_weight: number | null; size_gb: number; kind: FileKind; downloads: number | null; updated_at: string | null }
+/** A real copy of the model lands between ~1.2 (TQ1_0) and 17 (BF16 + overhead) bits per weight; anything else is a
+ *  tiny-random test repo, a partial upload or a pointer-only repo (W1, Wave 2). Unknown bpw (no param count) only needs ≥ 0.3 GB. */
+const plausibleFile = (f: FileOut) => f.size_gb >= 0.3 && (f.bits_per_weight == null || (f.bits_per_weight >= 1.2 && f.bits_per_weight <= 17));
 interface TreeEntry { type: string; path: string; size?: number; lfs?: { size?: number } }
 interface Listed { id: string; downloads?: number; tags?: string[]; lastModified?: string }
 
@@ -221,6 +224,9 @@ async function main() {
       if (done >= LIMIT || Date.now() - started > BUDGET_MS) break;
       try {
         const r = await syncModel(m);
+        const raw = r.files.length;
+        r.files = r.files.filter(plausibleFile);
+        if (raw > r.files.length) console.log(`  ${m.id}: skipped ${raw - r.files.length} implausible files (test repos / incomplete uploads)`);
         if (r.note) console.log(`  ${r.note}`);
         console.log(`  ${m.id} (${m.hf_repo}): params ${r.model?.total_params_b ?? '–'}B, active ${r.model?.active_params_b ?? '–'}B, kv ${r.model?.kv_bytes_per_token ?? '–'} B/tok, ${r.files.length} files`);
         if (DRY) for (const f of r.files) console.log(`    ${f.kind.padEnd(11)} ${f.repo} ${f.quant} ${f.format} ${f.size_gb} GB ${f.bits_per_weight ?? '–'} bpw`);
