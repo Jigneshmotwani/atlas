@@ -21,6 +21,13 @@ interface FileOut { model_id: string; repo: string; uploader: string; quant: str
  *  tiny-random test repo, a partial upload or a pointer-only repo (W1, Wave 2). Unknown bpw (no param count) only needs ≥ 0.3 GB. */
 const plausibleFile = (f: FileOut) => f.size_gb >= 0.3 && (f.bits_per_weight == null || (f.bits_per_weight >= 1.2 && f.bits_per_weight <= 17));
 interface TreeEntry { type: string; path: string; size?: number; lfs?: { size?: number } }
+/** Bytes of one copy of the weights: root-level .safetensors only when the repo has any (repos like openai/gpt-oss-*
+ *  also ship a second copy under original/ or metal/), else every .safetensors in the tree (W1, after launch). */
+function weightBytes(tree: TreeEntry[]): number {
+  const st = tree.filter(e => e.type === 'file' && /\.safetensors$/i.test(e.path));
+  const root = st.filter(e => !e.path.includes('/'));
+  return (root.length ? root : st).reduce((a, e) => a + fileSize(e), 0);
+}
 interface Listed { id: string; downloads?: number; tags?: string[]; lastModified?: string }
 
 const args = process.argv.slice(2);
@@ -159,7 +166,7 @@ async function filesOfRepo(modelId: string, repo: string, kind: FileKind, downlo
   for (const [stem, v] of [...stems].sort((a, b) => a[0].length - b[0].length)) if (!ggufs.has(v.quant) && stem) ggufs.set(v.quant, v.bytes);
   const row = (quant: string, format: FileFormat, bytes: number): FileOut => ({ model_id: modelId, repo, uploader, quant, format, bits_per_weight: bits(bytes, total), size_gb: r2(bytes / 1e9), kind, downloads, updated_at: updatedAt });
   if (ggufs.size) return [...ggufs].map(([q, b]) => row(q, 'gguf', b));
-  const st = tree.filter(e => e.type === 'file' && /\.safetensors$/i.test(e.path)).reduce((a, e) => a + fileSize(e), 0);
+  const st = weightBytes(tree);
   if (!st) return [];
   const cfg = await hf<Json>(`/${repo}/resolve/main/config.json`);
   const f = nonGgufFormat(repo, tags, cfg) ?? (kind === 'quant' ? null : officialFormat({}, cfg));
@@ -176,7 +183,7 @@ async function syncModel(m: { id: string; hf_repo: string }) {
   const files: FileOut[] = [];
   // step 2: the official file
   const tree = (await hf<TreeEntry[]>(`/api/models/${repo}/tree/main?recursive=true`)) ?? [];
-  const st = tree.filter(e => e.type === 'file' && /\.safetensors$/i.test(e.path)).reduce((a, e) => a + fileSize(e), 0);
+  const st = weightBytes(tree);
   if (st) {
     const f = officialFormat(info, cfg);
     files.push({ model_id: m.id, repo, uploader: repo.split('/')[0], quant: f.quant, format: f.format, bits_per_weight: bits(st, total), size_gb: r2(st / 1e9), kind: 'official', downloads: n(info.downloads), updated_at: (info.lastModified as string | undefined) ?? null });

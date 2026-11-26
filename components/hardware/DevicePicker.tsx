@@ -1,6 +1,7 @@
 'use client';
 // components/hardware/DevicePicker.tsx — "Pick devices" tab: catalog search, category chips, quantities, host PC. Owned by W7.
 import { useMemo, useState } from 'react';
+import { deviceMatchesQuery } from '@/lib/device-names';
 import type { Device, HardwareSpec, HostPc, SetupPick } from '@/lib/contracts';
 import { Icon } from '@/components/ui';
 
@@ -31,9 +32,8 @@ export function DevicePicker({ devices, aliases, picks, setPicks, host, setHost,
   const cats = useMemo(() => [...new Set(sorted.map(d => d.category))], [sorted]);
   const qty = (id: string) => picks.find(p => p.deviceId === id)?.qty ?? 0;
   const list = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    return sorted.filter(d => (cat === 'All' || d.category === cat)
-      && (!s || d.name.toLowerCase().includes(s) || (aliases[d.id] ?? []).some(a => a.toLowerCase().includes(s))));
+    // brand words are ignored: "asus rog 4090" finds GeForce RTX 4090, "dell gb300" finds the DGX Station
+    return sorted.filter(d => (cat === 'All' || d.category === cat) && deviceMatchesQuery(q, [d.name, ...(aliases[d.id] ?? [])]));
   }, [sorted, aliases, q, cat]);
   const step = (id: string, dv: number) => {
     const n = Math.max(0, qty(id) + dv);

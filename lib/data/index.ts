@@ -4,3 +4,4 @@ export { loadModels, loadCreators, toModelRow, type Creator } from './models';
 export { loadFiles, loadFileCount, toFileRow } from './files';
 export { loadDevices, loadDeviceAliases, loadRunStats, loadEta, toDevice } from './hardware';
 export { loadCalibrations, loadSourceStatus } from './meta';
+export { loadVendorBenchmarks, type VendorBenchmark } from './vendor';

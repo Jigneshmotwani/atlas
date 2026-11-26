@@ -11,6 +11,12 @@ import { Card, Icon, Pill, PopNumber, Select, Tag, Th, WhereTag } from '@/compon
 import { useStoredRaw } from './hooks';
 import { kldOf, METRIC_LABEL, SOURCES, fmtTps } from './labels';
 
+/** GET /api/benchmarks row (lib/data VendorBenchmark; redeclared because lib/data is server-only). */
+interface VendorRow {
+  deviceId: string; deviceName: string; devices: number; precision: string; runtime: string; batch: number;
+  isl: number | null; osl: number | null; promptTps: number | null; genTps: number | null; sourceName: string; sourceUrl: string; publishedOn: string | null;
+}
+
 const CTX_K = 32;
 
 export interface ModelDrawerProps {
@@ -63,6 +69,17 @@ function DrawerBody(props: ModelDrawerProps) {
     return () => { live = false; };
   }, [needFetch, model.id]);
   const loading = needFetch && fetched == null && !failed;
+
+  // speeds published by NVIDIA / OEMs for this model (vendor_benchmarks): shown under their own label, never as "measured"
+  const [vendor, setVendor] = useState<VendorRow[]>([]);
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/benchmarks?model=${encodeURIComponent(model.id)}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then((rows: unknown) => { if (live) setVendor(Array.isArray(rows) ? (rows as VendorRow[]) : []); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [model.id]);
 
   // files: official rows, then one file nearest 4.8 bits per derivative repo (finetune / abliterated / merge) and per quant uploader
   const own = given.length ? given : fetched ?? [];
@@ -162,6 +179,33 @@ function DrawerBody(props: ModelDrawerProps) {
               <div key={k} className="flex justify-between gap-2 border-b border-line py-2"><dt className="text-mute">{k}</dt><dd className="num font-semibold text-right">{v}</dd></div>
             ))}
           </dl>
+
+          {vendor.length > 0 && (
+            <>
+              <h3 className="font-semibold mt-7">Speeds reported by vendors</h3>
+              <p className="text-sm text-mute mt-1">Published by the hardware maker on its own tuned setup. Shown for reference; Atlas&apos;s estimates and measured runs don&apos;t use them.</p>
+              <Card className="mt-2 p-1">
+                <div className="scroll">
+                  <table className="w-full text-sm">
+                    <thead><tr><Th>Hardware</Th><Th>Setup</Th><Th r>Generate</Th><Th r>Prompt read</Th></tr></thead>
+                    <tbody>
+                      {vendor.map(v => (
+                        <tr key={`${v.deviceId}-${v.devices}-${v.precision}-${v.runtime}-${v.batch}`} className="border-t border-line align-top">
+                          <td className="p-3">
+                            <div className="font-semibold">{v.devices > 1 ? `${v.devices}× ` : ''}{v.deviceName}</div>
+                            <a href={v.sourceUrl} target="_blank" rel="noreferrer" className="text-xs text-mute underline underline-offset-2">{v.sourceName}{v.publishedOn ? ` · ${v.publishedOn.slice(0, 7)}` : ''}</a>
+                          </td>
+                          <td className="p-3 text-xs text-mute">{v.precision} · {v.runtime}<br />batch {v.batch}{v.isl && v.osl ? ` · ${v.isl}→${v.osl} tokens` : ''}</td>
+                          <td className="p-3 text-right num font-bold">{v.genTps != null ? `${fmt1(v.genTps)} tok/s` : '–'}</td>
+                          <td className="p-3 text-right num">{v.promptTps != null ? `${Math.round(v.promptTps).toLocaleString()} tok/s` : '–'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </>
+          )}
 
           {m.openWeights && (
             <>

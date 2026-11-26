@@ -1,0 +1,7 @@
+device_id,devices,model_id,model_name,precision,runtime,batch,isl,osl,prompt_tps,gen_tps,source,source_name,source_url,published_on,note
+spark,1,qwen3-14b,Qwen3 14B,NVFP4,TRT-LLM,1,2048,128,5928.95,22.71,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,
+spark,1,gpt-oss-20b,GPT-OSS-20B,MXFP4,llama.cpp,1,2048,128,3670.42,82.74,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,
+spark,1,gpt-oss-120b,GPT-OSS-120B,MXFP4,llama.cpp,1,2048,128,1725.47,55.37,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,
+spark,1,,Llama 3.1 8B,NVFP4,TRT-LLM,1,2048,128,10256.9,38.65,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,
+spark,1,,Qwen2.5-VL-7B-Instruct,NVFP4,TRT-LLM,1,2048,128,65831.77,41.71,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,
+spark,2,,Qwen3 235B,NVFP4,TRT-LLM,1,2048,128,23477.03,11.73,nvidia,NVIDIA Technical Blog,https://developer.nvidia.com/blog/how-nvidia-dgx-sparks-performance-enables-intensive-ai-tasks,2025-10-24,Two DGX Sparks linked via ConnectX-7

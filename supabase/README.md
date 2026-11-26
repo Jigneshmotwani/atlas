@@ -13,7 +13,8 @@ Apply in this order, once each. Re-running 0002 or the seed later is safe.
 
 1. `migrations/0001_init.sql`
 2. `migrations/0002_security.sql`
-3. `seed.sql`
+3. `migrations/0003_vendor_benchmarks.sql` (vendor-published speeds; then `pnpm exec tsx scripts/import-vendor-benchmarks.ts`)
+4. `seed.sql`
 
 **SQL editor.** Paste each file into Supabase → SQL Editor → Run, in the order above.
 
@@ -22,6 +23,7 @@ Apply in this order, once each. Re-running 0002 or the seed later is safe.
 ```sh
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0002_security.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0003_vendor_benchmarks.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/seed.sql
 ```
 

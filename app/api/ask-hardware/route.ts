@@ -6,6 +6,7 @@ import { specFromPicks } from '@/lib/engine';
 import { AiError, chatJson } from '@/lib/ai';
 import { askHardwareSystem } from '@/lib/ai-prompts';
 import { rankBySimilarity } from '@/lib/trigram';
+import { canonicalDeviceName } from '@/lib/device-names';
 import { ARCHS, BACKENDS, HardwareSpecSchema, LINKS } from '@/components/hardware/spec';
 import { BLANK_SPEC } from '@/lib/state';
 
@@ -82,9 +83,10 @@ function wordGroups(text: string): string[] {
 }
 
 function candidates(text: string, devices: Device[], aliases: Map<string, string[]>): Device[] {
-  const names = (d: Device) => [d.name, ...(aliases.get(d.id) ?? [])];
+  // also compare brand-free forms, so "ASUS ROG 4090" ranks the GeForce RTX 4090 (lib/device-names.ts)
+  const names = (d: Device) => { const n = [d.name, ...(aliases.get(d.id) ?? [])]; return [...n, ...n.map(canonicalDeviceName)]; };
   const best = new Map<string, number>();
-  for (const g of wordGroups(text)) {
+  for (const g of [...wordGroups(text), ...wordGroups(canonicalDeviceName(text))]) {
     for (const { item, score } of rankBySimilarity(g, devices, names, { min: 0.15, limit: 50 })) {
       if (score > (best.get(item.id) ?? 0)) best.set(item.id, score);
     }

@@ -8,7 +8,9 @@ import { fmtTime } from '@/lib/format';
 import { Card, Gem, Head, PopNumber, SpeedCell, TableBox, Th, WhereTag } from '@/components/ui';
 import type { HardwareMode } from '@/lib/state';
 
-export interface FitRow { m: ScoredModel; fit: ModelFit; file: FileRow | undefined; compare: boolean }
+/** A vendor-published speed for this model on exactly this setup (lib/data VendorBenchmark, trimmed for the client). */
+export interface HardwareVendor { deviceId: string; devices: number; modelId: string | null; genTps: number | null; precision: string; runtime: string; sourceName: string; sourceUrl: string }
+export interface FitRow { m: ScoredModel; fit: ModelFit; file: FileRow | undefined; compare: boolean; vendor?: HardwareVendor }
 
 export interface ResultsProps {
   spec: HardwareSpec | null;
@@ -59,7 +61,7 @@ export function Results({ spec, rows, mode, ctx, setCtx, probeLabel, notice, onO
             <TableBox>
               <thead className="bg-soft"><tr><Th>Model</Th><Th>Best file</Th><Th>Runs</Th><Th r>Memory</Th><Th r>Speed</Th><Th r>Prompt read</Th><Th r>Load</Th></tr></thead>
               <tbody>
-                {rows.map(({ m, fit, file, compare }) => {
+                {rows.map(r => { const { m, fit, file, compare } = r;
                   const best = fit.best, k = file ? kldOf(file) : null, measured = best.speed?.kind === 'measured';
                   return (
                     <tr key={m.id} className="border-t border-line hover:bg-soft align-top">
@@ -79,7 +81,15 @@ export function Results({ spec, rows, mode, ctx, setCtx, probeLabel, notice, onO
                         {!best.fitsDisk && best.where !== 'no' && <div className="text-xs text-warn mt-1 font-semibold">Not enough disk</div>}
                       </td>
                       <td className="p-3 text-right num">{best.needGb} GB</td>
-                      <td className="p-3"><SpeedCell fit={best.where === 'no' ? null : best} /></td>
+                      <td className="p-3">
+                        <SpeedCell fit={best.where === 'no' ? null : best} />
+                        {r.vendor?.genTps != null && (
+                          <a href={r.vendor.sourceUrl} target="_blank" rel="noreferrer" title={`Published by ${r.vendor.sourceName} on its own tuned setup; not used in Atlas's estimate`}
+                            className="mt-1 block text-right text-xs text-mute underline underline-offset-2 whitespace-nowrap">
+                            {r.vendor.sourceName.startsWith('NVIDIA') ? 'NVIDIA' : r.vendor.sourceName}: {r.vendor.genTps} tok/s · {r.vendor.precision}
+                          </a>
+                        )}
+                      </td>
                       <td className="p-3 text-right num">{best.where === 'no' || best.promptTps == null ? '–' : `${measured ? '' : '≈'}${best.promptTps} tok/s`}</td>
                       <td className="p-3 text-right num">{best.where === 'no' ? '–' : fmtTime(best.loadS)}</td>
                     </tr>

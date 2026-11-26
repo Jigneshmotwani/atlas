@@ -319,7 +319,7 @@ from (values
 join files f on f.id = v.file_id and f.repo = v.repo and f.quant = v.quant
 on conflict (file_id, eval_set, source) do nothing;
 
--- devices (219)
+-- devices (220)
 insert into devices (id, name, category, type, mem_gb, bw_gbs, fp16_tflops, fp8, fp4, backend, usable_frac, source, verified, aliases) values
   ('spark', 'NVIDIA DGX Spark', 'AI box', 'unified', 128, 273, 125, true, false, 'cuda', null, 'curated', true, array['GB10', 'DGX Spark', 'NVIDIA GB10', 'ASUS Ascent GX10', 'Dell Pro Max with GB10', 'Lenovo ThinkStation PGX', 'HP ZGX Nano G1n', 'MSI EdgeXpert', 'Acer Veriton GN100']::text[]),
   ('aimax', 'AMD Ryzen AI Max+ 395 (128GB)', 'AI box', 'unified', 128, 256, 59, false, false, 'rocm', null, 'curated', true, array['AMD Ryzen AI Max+ 395', 'Ryzen AI Max+ 395 128GB', 'Strix Halo 128GB', 'AMD Radeon 8060S', 'Framework Desktop 128GB', 'GMKtec EVO-X2 128GB', 'HP Z2 Mini G1a 128GB']::text[]),
@@ -451,10 +451,10 @@ insert into devices (id, name, category, type, mem_gb, bw_gbs, fp16_tflops, fp8,
   ('gh200x144', 'GH200 144GB', 'Data center', 'gpu', 144, 4900, 989, true, false, 'cuda', null, 'curated', true, array['NVIDIA GH200 144GB', 'NVIDIA GH200 144G HBM3e']::text[]),
   ('h20', 'H20 96GB', 'Data center', 'gpu', 96, 4000, 148, true, false, 'cuda', null, 'curated', true, array['NVIDIA H20 96GB', 'NVIDIA H20']::text[]),
   ('h800', 'H800 80GB SXM', 'Data center', 'gpu', 80, 3350, 989, true, false, 'cuda', null, 'curated', true, array['H800 SXM5', 'NVIDIA H800 80GB SXM', 'NVIDIA H800 SXM5', 'NVIDIA H800']::text[]),
-  ('b200', 'B200 180GB', 'Data center', 'gpu', 180, 8000, 2250, true, true, 'cuda', null, 'curated', true, array['B200', 'NVIDIA B200 180GB', 'NVIDIA B200']::text[]),
-  ('b300', 'B300 288GB', 'Data center', 'gpu', 288, 8000, 2250, true, true, 'cuda', null, 'curated', true, array['B300', 'NVIDIA B300 288GB', 'NVIDIA B300', 'Blackwell Ultra B300']::text[]),
-  ('gb200', 'GB200 (per GPU) 186GB', 'Data center', 'gpu', 186, 8000, 2500, true, true, 'cuda', null, 'curated', true, array['NVIDIA GB200 (per GPU) 186GB', 'NVIDIA GB200 (per GPU)', 'GB200 NVL72']::text[]),
-  ('gb300', 'GB300 (per GPU) 279GB', 'Data center', 'gpu', 279, 8000, 2500, true, true, 'cuda', null, 'curated', true, array['NVIDIA GB300 (per GPU) 279GB', 'NVIDIA GB300 (per GPU)', 'GB300 NVL72']::text[]),
+  ('b200', 'B200 180GB', 'Data center', 'gpu', 180, 8000, 2250, true, true, 'cuda', null, 'curated', true, array['B200', 'NVIDIA B200 180GB', 'NVIDIA B200', 'NVIDIA DGX B200', 'NVIDIA HGX B200']::text[]),
+  ('b300', 'B300 288GB', 'Data center', 'gpu', 288, 8000, 2250, true, true, 'cuda', null, 'curated', true, array['B300', 'NVIDIA B300 288GB', 'NVIDIA B300', 'Blackwell Ultra B300', 'NVIDIA DGX B300', 'NVIDIA HGX B300']::text[]),
+  ('gb200', 'GB200 (per GPU) 186GB', 'Data center', 'gpu', 186, 8000, 2500, true, true, 'cuda', null, 'curated', true, array['NVIDIA GB200 (per GPU) 186GB', 'NVIDIA GB200 (per GPU)', 'GB200 NVL72', 'NVIDIA DGX GB200', 'NVIDIA GB200 NVL72', 'Dell PowerEdge XE9712 (GB200 NVL72)', 'HPE NVIDIA GB200 NVL72', 'Supermicro GB200 NVL72']::text[]),
+  ('gb300', 'GB300 (per GPU) 279GB', 'Data center', 'gpu', 279, 8000, 2500, true, true, 'cuda', null, 'curated', true, array['NVIDIA GB300 (per GPU) 279GB', 'NVIDIA GB300 (per GPU)', 'GB300 NVL72', 'NVIDIA DGX GB300', 'NVIDIA GB300 NVL72', 'Dell PowerEdge XE9712 (GB300 NVL72)', 'HPE NVIDIA GB300 NVL72', 'Supermicro GB300 NVL72']::text[]),
   ('mi100', 'Instinct MI100 32GB', 'Data center', 'gpu', 32, 1229, 184.6, false, false, 'rocm', null, 'curated', true, array['Radeon Instinct MI100', 'AMD Instinct MI100 32GB', 'AMD Instinct MI100']::text[]),
   ('mi210', 'Instinct MI210 64GB', 'Data center', 'gpu', 64, 1638, 181, false, false, 'rocm', null, 'curated', true, array['Radeon Instinct MI210', 'AMD Instinct MI210 64GB', 'AMD Instinct MI210']::text[]),
   ('mi250', 'Instinct MI250 128GB', 'Data center', 'gpu', 128, 3277, 362, false, false, 'rocm', null, 'curated', true, array['Radeon Instinct MI250', 'AMD Instinct MI250 128GB', 'AMD Instinct MI250']::text[]),
@@ -539,7 +539,8 @@ insert into devices (id, name, category, type, mem_gb, bw_gbs, fp16_tflops, fp8,
   ('orin32', 'NVIDIA Jetson AGX Orin 32GB', 'AI box', 'unified', 32, 205, 13.1, false, false, 'cuda', null, 'curated', true, array['Jetson AGX Orin 32 GB', 'Jetson AGX Orin 32GB']::text[]),
   ('orinnx16', 'NVIDIA Jetson Orin NX 16GB', 'AI box', 'unified', 16, 102, 7.4, false, false, 'cuda', null, 'curated', true, array['Jetson Orin NX 16 GB', 'Jetson Orin NX 16GB']::text[]),
   ('orinnano', 'NVIDIA Jetson Orin Nano Super 8GB', 'AI box', 'unified', 8, 102, 8.2, false, false, 'cuda', null, 'curated', true, array['Jetson Orin Nano Super', 'Jetson Orin Nano Super Developer Kit', 'Jetson Orin Nano 8GB']::text[]),
-  ('thor', 'NVIDIA Jetson AGX Thor 128GB', 'AI box', 'unified', 128, 273, null, true, true, 'cuda', null, 'curated', true, array['Jetson T5000', 'Jetson AGX Thor']::text[])
+  ('thor', 'NVIDIA Jetson AGX Thor 128GB', 'AI box', 'unified', 128, 273, null, true, true, 'cuda', null, 'curated', true, array['Jetson T5000', 'Jetson AGX Thor']::text[]),
+  ('dgxstation', 'NVIDIA DGX Station GB300', 'AI box', 'gpu', 252, 7100, 2500, true, true, 'cuda', null, 'curated', true, array['DGX Station', 'NVIDIA DGX Station', 'DGX Station GB300', 'GB300 Grace Blackwell Ultra Desktop Superchip', 'ASUS ExpertCenter Pro ET900N G3', 'Dell Pro Max with GB300', 'HP ZGX Fury AI Station G1n', 'HP ZGX Fury', 'MSI XpertStation WS300', 'Gigabyte W775-V10-L01', 'Supermicro Super AI Station', 'Exxact VWS-158270643']::text[])
 on conflict (id) do update set
   name = excluded.name, category = excluded.category, type = excluded.type, mem_gb = excluded.mem_gb, bw_gbs = excluded.bw_gbs,
   fp16_tflops = excluded.fp16_tflops, fp8 = excluded.fp8, fp4 = excluded.fp4, backend = excluded.backend, usable_frac = excluded.usable_frac,

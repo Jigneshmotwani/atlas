@@ -15,13 +15,15 @@ import { ModelDrawer } from '@/components/detail/ModelDrawer';
 import { comparableModelIds } from '@/components/quants/select';
 import { AskAi, type AskAiResult, type ChatMsg } from './AskAi';
 import { DevicePicker } from './DevicePicker';
-import { Results, type FitRow } from './Results';
+import { Results, type FitRow, type HardwareVendor } from './Results';
 import { SpecForm } from './SpecForm';
 import { HardwareSpecSchema, decodeSpec, encodeSpec } from './spec';
 
 export interface HardwareData {
   models: ModelRow[]; files: FileRow[]; calibrations: Calibration[]; devices: Device[];
   aliases: Record<string, string[]>; runStats: RunStat[]; eta: EtaCalibration[];
+  /** vendor-published speeds (NVIDIA / OEM), shown as a labelled tag when the setup matches exactly */
+  vendor?: HardwareVendor[];
 }
 
 const MODES: [HardwareMode, string][] = [['pick', 'Pick devices'], ['manual', 'Enter specs'], ['ai', 'Ask AI']];
@@ -83,7 +85,7 @@ function initial(params: Params): Init {
   };
 }
 
-function Planner({ models, files, calibrations, devices, aliases, runStats, eta, params }: HardwareData & { params: Params }) {
+function Planner({ models, files, calibrations, devices, aliases, runStats, eta, vendor = [], params }: HardwareData & { params: Params }) {
   const [init] = useState(() => initial(params));
   const [mode, setMode] = useState(init.mode);
   const [picks, setPicks] = useState(init.picks);
@@ -135,14 +137,19 @@ function Planner({ models, files, calibrations, devices, aliases, runStats, eta,
   const pickSpec = useMemo(() => specFromPicks(picks, devices, host), [picks, devices, host]);
   const spec: HardwareSpec | null = mode === 'pick' ? pickSpec : mode === 'manual' ? manual : ai;
 
+  // vendor numbers apply only to the exact setup they were measured on: N× one catalog device
+  const specDeviceId = spec?.deviceId;
+  const setup = useMemo(() => mode === 'pick' && picks.length === 1 ? { deviceId: picks[0].deviceId, qty: picks[0].qty }
+    : specDeviceId ? { deviceId: specDeviceId, qty: 1 } : null, [mode, picks, specDeviceId]);
   const rows: FitRow[] = useMemo(() => {
     if (!spec) return [];
     return scored.filter(m => (filesBy.get(m.id)?.length ?? 0) > 0).map(m => {
       const mf = filesBy.get(m.id)!;
       const fit = fitModel(m, mf, spec, ctx, { runStats, eta });
-      return { m, fit, file: mf.find(f => f.id === fit.best.fileId), compare: comparable.has(m.id) };
+      const v = setup ? vendor.find(x => x.modelId === m.id && x.deviceId === setup.deviceId && x.devices === setup.qty && x.genTps != null) : undefined;
+      return { m, fit, file: mf.find(f => f.id === fit.best.fileId), compare: comparable.has(m.id), vendor: v };
     }).sort((x, y) => RANK[x.fit.best.where] - RANK[y.fit.best.where] || (y.m.intelligence ?? -1e9) - (x.m.intelligence ?? -1e9));
-  }, [spec, scored, filesBy, ctx, runStats, eta, comparable]);
+  }, [spec, scored, filesBy, ctx, runStats, eta, comparable, setup, vendor]);
 
   const label = useMemo(() => {
     if (mode === 'pick') return picks.map(p => `${p.qty}× ${devices.find(d => d.id === p.deviceId)?.name ?? p.deviceId}`).join(' + ') || undefined;

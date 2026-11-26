@@ -2,17 +2,16 @@
 // Pure and isomorphic: imported by the /probe client component and by POST /api/runs so both apply
 // the same rule (SPEC "/api/runs checks" step 2): exact id, then alias, then trigram similarity >= 0.8.
 import { similarity } from '@/lib/trigram';
+import { canonicalDeviceName } from '@/lib/device-names';
 
 export interface DeviceName { id: string; name: string; aliases: string[] }
 export interface DeviceMatch { id: string; method: 'id' | 'alias' | 'trigram'; score: number }
 
 export const DEVICE_MATCH_MIN = 0.8;
 
-const VENDOR = /^(nvidia|amd|apple|intel|ati)\s+/;
-/** Lowercase, drop the vendor prefix and filler words tools add ("NVIDIA GeForce RTX 4090 Laptop GPU" → "geforce rtx 4090 laptop"). */
-export const normalizeDeviceName = (s: string) =>
-  s.toLowerCase().replace(/\(r\)|\(tm\)/g, ' ').replace(/\s+/g, ' ').trim()
-    .replace(VENDOR, '').replace(/\b(gpu|graphics|generation|series)\b/g, ' ').replace(/\s+/g, ' ').trim();
+/** Lowercase, drop the chip vendor, OEM board brands and filler words ("ASUS TUF Gaming GeForce RTX 4090 OC" → "geforce rtx 4090").
+ *  Shared with Pick devices search and Ask AI via lib/device-names.ts. */
+export const normalizeDeviceName = canonicalDeviceName;
 
 const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
