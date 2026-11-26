@@ -53,8 +53,10 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
   const [rowLimit, setRowLimit] = useState(ROW_START);
   const searchId = useId();
 
-  const M = metricDef(mk);
-  const qs = toQs([['m', mk === 'intelligence' ? null : mk], ['q', q.trim()], ['w', f.w === 'any' ? null : f.w], ['r', f.r === 'any' ? null : f.r],
+  // only metrics some model actually has a value for (the free AA tier publishes no coding / agentic / math / long-context scores)
+  const metrics = useMemo(() => { const l = EXPLORER_METRICS.filter(x => scored.some(m => x.get(m) != null)); return l.length ? l : EXPLORER_METRICS; }, [scored]);
+  const M = metrics.find(x => x.k === mk) ?? metrics[0] ?? metricDef(mk);
+  const qs = toQs([['m', M.k === 'intelligence' ? null : M.k], ['q', q.trim()], ['w', f.w === 'any' ? null : f.w], ['r', f.r === 'any' ? null : f.r],
     ['ctx', f.ctx || null], ['p', prov.param], ['in', f.inp.join(',')]], ['p']);
   useUrlSync(qs, query != null);
 
@@ -83,11 +85,11 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
 
   const reset = () => { setQ(''); setF(NO_FILTERS); prov.set(prov.defaults); };
   const tabKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-    const n = EXPLORER_METRICS.length;
+    const n = metrics.length;
     const j = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
     if (j < 0) return;
     e.preventDefault();
-    setMk(EXPLORER_METRICS[j].k);
+    setMk(metrics[j].k);
     (e.currentTarget.parentElement?.children[j] as HTMLElement | undefined)?.focus();
   };
 
@@ -110,10 +112,10 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
         <Head title={title} />
         <div className="scroll nobar edge mt-5 -mx-1 px-1">
           <div className="flex gap-1.5 w-max p-1 rounded-full bg-soft border border-line" role="tablist" aria-label="Metric">
-            {EXPLORER_METRICS.map((x, i) => (
-              <button key={x.k} type="button" role="tab" aria-selected={mk === x.k} tabIndex={mk === x.k ? 0 : -1}
+            {metrics.map((x, i) => (
+              <button key={x.k} type="button" role="tab" aria-selected={M.k === x.k} tabIndex={M.k === x.k ? 0 : -1}
                 onClick={() => setMk(x.k)} onKeyDown={e => tabKey(e, i)}
-                className={`h-9 px-4 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${mk === x.k ? 'bg-ink text-bg' : 'hover:bg-card'}`}>{x.l}</button>
+                className={`h-9 px-4 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${M.k === x.k ? 'bg-ink text-bg' : 'hover:bg-card'}`}>{x.l}</button>
             ))}
           </div>
         </div>
@@ -183,8 +185,8 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
             <thead className="bg-soft">
               <tr>
                 <Th>#</Th><Th>Model</Th>
-                {mk === 'intelligence' ? intelSources.map(s => <Th key={s.id} r>{s.name}</Th>) : <Th r>{M.l}</Th>}
-                <Th r>{mk === 'intelligence' ? 'Average' : 'Intelligence'}</Th>
+                {M.k === 'intelligence' ? intelSources.map(s => <Th key={s.id} r>{s.name}</Th>) : <Th r>{M.l}</Th>}
+                <Th r>{M.k === 'intelligence' ? 'Average' : 'Intelligence'}</Th>
                 <Th r>Cost / task</Th><Th r>Time / task</Th><Th r>Context</Th>
               </tr>
             </thead>
@@ -199,10 +201,10 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
                     </span>
                     <div className="text-xs text-mute">{modelSub(m)}</div>
                   </td>
-                  {mk === 'intelligence'
+                  {M.k === 'intelligence'
                     ? intelSources.map(s => { const x = raw(m, s.id); return <td key={s.id} className="p-3 text-right num">{x != null ? fmt1(x) : <span className="text-mute">–</span>}</td>; })
                     : <td className="p-3 text-right num font-bold">{M.fmt(v)}</td>}
-                  <td className="p-3 text-right num font-bold">{mk === 'intelligence' && m.intelligence != null ? m.intelligence.toFixed(1) : fmt1(m.intelligence)}</td>
+                  <td className="p-3 text-right num font-bold">{M.k === 'intelligence' && m.intelligence != null ? m.intelligence.toFixed(1) : fmt1(m.intelligence)}</td>
                   <td className="p-3 text-right num">{fmtUsd(m.costPerTask)}</td>
                   <td className="p-3 text-right num">{fmtTime(m.timePerTask)}</td>
                   <td className="p-3 text-right num">{fmtCtx(m.contextK)}</td>

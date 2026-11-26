@@ -78,7 +78,8 @@ function DrawerBody(props: ModelDrawerProps) {
 
   const o = m.offer;
   const details: [string, string][] = [
-    ...(['coding', 'agentic', 'cyber', 'math', 'long_ctx'] as const).map((k): [string, string] => [METRIC_LABEL[k], fmt1(m.domain[k])]),
+    // domain scores this model doesn't have (most, on the free AA tier) are left out rather than shown as '–'
+    ...(['coding', 'agentic', 'cyber', 'math', 'long_ctx'] as const).filter(k => m.domain[k] != null).map((k): [string, string] => [METRIC_LABEL[k], fmt1(m.domain[k])]),
     ['Context window', fmtCtx(m.contextK)],
     ['Price in / out', o?.priceIn != null && o.priceOut != null ? `$${o.priceIn} / $${o.priceOut}` : '–'],
     ['Speed', fmtTps(o?.tpsMedian)],

@@ -71,9 +71,12 @@ export function RecommenderFromUrl(props: RecommenderData) {
 /** `query = null` renders step 1 with default answers and never writes the URL (prerendered Suspense fallback). */
 export function Recommender({ models, calibrations, creators, runStats, eta, query }: RecommenderData & { query: Query }) {
   const scored = useMemo(() => scoreModels(models, calibrations), [models, calibrations]);
+  // only use cases that some model has a score for (the free AA tier publishes no coding / agentic / math / long-context scores)
+  const focusOpts = useMemo(() => FOCUS.filter(([k]) => k === 'intelligence' || scored.some(m => scoreFor(m, k) != null)), [scored]);
   const [a, setA] = useState<Answers>(() => parse(query));
   const [i, setI] = useState(() => oneOf(Number(query?.get('s') ?? 1), [1, 2, 3, 4, 5], 1) - 1);
   const prov = useProviders(query, creators, models);
+  const focus: Metric = focusOpts.some(o => o[0] === a.focus) ? a.focus : 'intelligence';
   const [openId, setOpenId] = useState<string | null>(null);
   const S = (v: Partial<Answers>) => setA(s => ({ ...s, ...v }));
   const last = STEPS.length - 1;
@@ -81,18 +84,18 @@ export function Recommender({ models, calibrations, creators, runStats, eta, que
 
   const pri = a.intel === DEFAULT_PRI.intel && a.speed === DEFAULT_PRI.speed && a.cost === DEFAULT_PRI.cost ? null : `${a.intel}.${a.speed}.${a.cost}`;
   const qs = toQs([['s', i ? i + 1 : null], ['pri', pri], ['ow', a.weights === 'any' ? null : a.weights], ['r', a.reason === 'any' ? null : a.reason],
-    ['in', a.inp.join(',')], ['out', a.out.join(',')], ['ctx', a.ctx || null], ['f', a.focus === 'intelligence' ? null : a.focus], ['p', prov.param]], ['p']);
+    ['in', a.inp.join(',')], ['out', a.out.join(',')], ['ctx', a.ctx || null], ['f', focus === 'intelligence' ? null : focus], ['p', prov.param]], ['p']);
   useUrlSync(qs, query != null);
 
   const res = useMemo(() => {
     const input: RecommendInput = {
       weights: { intelligence: a.intel, speed: a.speed, cost: a.cost },
-      openWeights: a.weights, reasoning: a.reason, inputs: a.inp, outputs: a.out, minContextK: a.ctx, focus: a.focus, providers: prov.value,
+      openWeights: a.weights, reasoning: a.reason, inputs: a.inp, outputs: a.out, minContextK: a.ctx, focus, providers: prov.value,
     };
     return recommend(scored, input);
-  }, [scored, a, prov.value]);
+  }, [scored, a, focus, prov.value]);
 
-  const focusLabel = a.focus === 'intelligence' ? 'Intelligence' : FOCUS.find(o => o[0] === a.focus)?.[1] ?? 'Score';
+  const focusLabel = focus === 'intelligence' ? 'Intelligence' : FOCUS.find(o => o[0] === focus)?.[1] ?? 'Score';
   const pct = (v: number) => Math.round((100 * v) / tot);
   const open = openId ? scored.find(m => m.id === openId) : undefined;
 
@@ -145,7 +148,7 @@ export function Recommender({ models, calibrations, creators, runStats, eta, que
           {i === 3 && (
             <div className="space-y-9 max-w-3xl">
               <OptGroup label="Minimum context" value={a.ctx} onChange={v => S({ ctx: v })} opts={CTX_OPTS} />
-              <OptGroup label="Main use case" value={a.focus} onChange={v => S({ focus: v })} opts={FOCUS} />
+              <OptGroup label="Main use case" value={focus} onChange={v => S({ focus: v })} opts={focusOpts} />
               <div>
                 <div className="serif text-3xl mb-3">Providers</div>
                 <ProviderSelect value={prov.value} onChange={prov.set} providers={prov.options} defaults={prov.defaults} />
@@ -167,7 +170,7 @@ export function Recommender({ models, calibrations, creators, runStats, eta, que
                       <div className="text-xs text-mute">{x.model.creatorName}</div>
                     </td>
                     <td className="p-3 text-right num font-bold">{x.match}%</td>
-                    <td className="p-3 text-right num">{fmt1(scoreFor(x.model, a.focus))}</td>
+                    <td className="p-3 text-right num">{fmt1(scoreFor(x.model, focus))}</td>
                     <td className="p-3 text-right num">{fmtUsd(x.model.costPerTask)}</td>
                     <td className="p-3 text-right num">{fmtTime(x.model.timePerTask)}</td>
                     <td className="p-3 text-right num">{fmtTps(x.model.offer?.tpsMedian)}</td>
