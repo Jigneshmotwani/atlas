@@ -25,7 +25,7 @@ const CTX = [0, 128, 256, 1000] as const;
 const INPUTS = ['image', 'audio', 'video'] as const satisfies readonly Modality[];
 interface Filters { w: (typeof WEIGHTS)[number]; r: (typeof REASONING)[number]; ctx: number; inp: (typeof INPUTS)[number][] }
 const NO_FILES: never[] = [];
-const BAR_LIMIT = 15, ROW_LIMIT = 50;
+const BAR_LIMIT = 15, ROW_START = 15, ROW_STEP = 25;
 const NO_FILTERS: Filters = { w: 'any', r: 'any', ctx: 0, inp: [] };
 
 /** Reads the URL (needs a Suspense boundary above it). */
@@ -50,7 +50,7 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
   const [openId, setOpenId] = useState<string | null>(null);
   // real data has hundreds of models: show the prototype-sized top N, with "Show all" (W1, Wave 2)
   const [allBars, setAllBars] = useState(false);
-  const [allRows, setAllRows] = useState(false);
+  const [rowLimit, setRowLimit] = useState(ROW_START);
   const searchId = useId();
 
   const M = metricDef(mk);
@@ -189,7 +189,7 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
               </tr>
             </thead>
             <tbody>
-              {(allRows ? rows : rows.slice(0, ROW_LIMIT)).map(({ m, v }, i) => (
+              {rows.slice(0, rowLimit).map(({ m, v }, i) => (
                 <tr key={m.id} className="border-t border-line hover:bg-soft">
                   <td className="p-3 num text-mute">{i + 1}</td>
                   <td className="p-3">
@@ -210,11 +210,17 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
               ))}
             </tbody>
           </TableBox>
-          {rows.length > ROW_LIMIT && (
-            <div className="px-3 pt-2">
-              <button type="button" onClick={() => setAllRows(!allRows)} className="h-10 text-sm font-semibold underline underline-offset-4 decoration-acc decoration-2">
-                {allRows ? `Show top ${ROW_LIMIT}` : `Show all ${rows.length} models`}
-              </button>
+          {rows.length > ROW_START && (
+            <div className="flex flex-wrap items-center gap-x-5 px-3 pt-2 text-sm">
+              <span className="text-mute num">Showing {Math.min(rowLimit, rows.length)} of {rows.length}</span>
+              {rowLimit < rows.length && (
+                <button type="button" onClick={() => setRowLimit(n => n + ROW_STEP)} className="h-10 font-semibold underline underline-offset-4 decoration-acc decoration-2">
+                  Show {Math.min(ROW_STEP, rows.length - rowLimit)} more
+                </button>
+              )}
+              {rowLimit > ROW_START && (
+                <button type="button" onClick={() => setRowLimit(ROW_START)} className="h-10 font-semibold text-mute hover:text-ink">Show top {ROW_START}</button>
+              )}
             </div>
           )}
           <p className="text-xs text-mute p-3">Average = each source mapped onto the Artificial Analysis scale, then averaged. Sources that haven&apos;t tested a model are skipped.</p>

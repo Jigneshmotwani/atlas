@@ -81,6 +81,16 @@ function View({ m, evalSet, files, qm, spec, budRaw, setBud, runStats, eta, foot
   const best = view.bestUnder != null ? byId.get(view.bestUnder) ?? null : null;
   const gap = view.uploaderGap;
   const ups = [...new Set(view.points.map(f => f.uploader))];
+  // table filter (W1, Wave 2): real models have 40+ quants, so default to the trade-off line; legend click = one uploader
+  const [show, setShow] = useState<'best' | 'budget' | 'all'>('best');
+  const [upOnly, setUpOnly] = useState<string | null>(null);
+  const byUp = (f: FileRow) => !upOnly || f.uploader === upOnly;
+  const lists = {
+    best: all.filter(f => byUp(f) && (frontIds.has(f.id) || f.id === best?.id)),
+    budget: all.filter(f => byUp(f) && (k(f) ?? 0) > 0 && f.sizeGb <= bud),
+    all: all.filter(byUp),
+  };
+  const shown = lists[show];
   const pick = (id: string) => window.history.replaceState(null, '', `${window.location.pathname}?model=${encodeURIComponent(id)}`);
 
   return (
@@ -104,19 +114,37 @@ function View({ m, evalSet, files, qm, spec, budRaw, setBud, runStats, eta, foot
             </button>
           )}
         </div>
-        <div className="mt-4"><Scatter pts={pts} front={front} best={best ? pt(best) : null} bud={bud} /></div>
+        <div className="mt-4"><Scatter pts={upOnly ? pts.filter(p => p.up === upOnly) : pts} front={front} best={best ? pt(best) : null} bud={bud} /></div>
         <div className="flex flex-wrap gap-x-5 gap-y-2 mt-3 text-xs font-semibold">
-          {ups.map(u => <span key={u} className="flex items-center gap-1.5"><svg width="16" height="16" aria-hidden="true"><Mark x={8} y={8} u={u} r={5} /></svg>{u}</span>)}
+          {ups.map(u => (
+            <button key={u} type="button" aria-pressed={upOnly === u} title={upOnly === u ? 'Show every uploader' : `Show only ${u}`}
+              onClick={() => setUpOnly(upOnly === u ? null : u)}
+              className={`h-8 flex items-center gap-1.5 rounded-full transition-opacity ${upOnly && upOnly !== u ? 'opacity-40 hover:opacity-80' : ''} ${upOnly === u ? 'underline underline-offset-4 decoration-acc decoration-2' : ''}`}>
+              <svg width="16" height="16" aria-hidden="true"><Mark x={8} y={8} u={u} r={5} /></svg>{u}
+            </button>
+          ))}
           <span className="flex items-center gap-1.5 text-mute">
             <svg width="22" height="10" aria-hidden="true"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--ink)" strokeDasharray="5 4" strokeWidth="1.5" /></svg>best trade-off line
           </span>
         </div>
       </Card>
       <Card className="p-2 sm:p-3">
+        <div className="flex flex-wrap items-center gap-3 p-2 pb-3">
+          <div className="scroll nobar flex gap-1.5 w-max max-w-full p-1 rounded-full bg-soft border border-line" role="group" aria-label="Which quants to list">
+            {([['best', 'Best trade-offs'], ['budget', 'Fits budget'], ['all', 'All']] as const).map(([v, l]) => (
+              <button key={v} type="button" aria-pressed={show === v} onClick={() => setShow(v)}
+                className={`h-9 px-4 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${show === v ? 'bg-ink text-bg' : 'hover:bg-card'}`}>
+                {l} <span className={`num ${show === v ? 'opacity-70' : 'text-mute'}`}>{lists[v].length}</span>
+              </button>
+            ))}
+          </div>
+          {upOnly && <button type="button" onClick={() => setUpOnly(null)} className="h-9 text-sm font-semibold text-mute hover:text-ink">Only {upOnly} · show all uploaders</button>}
+        </div>
         <TableBox>
           <thead className="bg-soft"><tr><Th>Uploader</Th><Th>Quant</Th><Th r>Bits</Th><Th r>Size</Th><Th r>KLD</Th><Th>Quality</Th>{spec && <Th r>On your hardware</Th>}</tr></thead>
           <tbody>
-            {all.map(f => {
+            {!shown.length && <tr><td colSpan={7} className="p-4 text-sm text-mute">No quants in this view. Try All, or a bigger memory budget.</td></tr>}
+            {shown.map(f => {
               const kv = k(f), r = spec ? fitFile(m, f, spec, 32, { runStats, eta }) : null, under = f.sizeGb <= bud;
               return (
                 <tr key={f.id} className={`border-t border-line ${under ? '' : 'opacity-50'}`} style={{ background: best?.id === f.id ? 'color-mix(in srgb, var(--butter) 55%, transparent)' : undefined }}>
