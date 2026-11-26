@@ -25,6 +25,7 @@ const CTX = [0, 128, 256, 1000] as const;
 const INPUTS = ['image', 'audio', 'video'] as const satisfies readonly Modality[];
 interface Filters { w: (typeof WEIGHTS)[number]; r: (typeof REASONING)[number]; ctx: number; inp: (typeof INPUTS)[number][] }
 const NO_FILES: never[] = [];
+const BAR_LIMIT = 15, ROW_LIMIT = 50;
 const NO_FILTERS: Filters = { w: 'any', r: 'any', ctx: 0, inp: [] };
 
 /** Reads the URL (needs a Suspense boundary above it). */
@@ -47,6 +48,9 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
   }));
   const prov = useProviders(query, creators, models);
   const [openId, setOpenId] = useState<string | null>(null);
+  // real data has hundreds of models: show the prototype-sized top N, with "Show all" (W1, Wave 2)
+  const [allBars, setAllBars] = useState(false);
+  const [allRows, setAllRows] = useState(false);
   const searchId = useId();
 
   const M = metricDef(mk);
@@ -139,7 +143,7 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
 
         {rows.length ? (
           <div key={mk + rows.length} className="mt-6 space-y-2">
-            {bars.map(({ m, v }, i) => (
+            {(allBars ? bars : bars.slice(0, BAR_LIMIT)).map(({ m, v }, i) => (
               <button key={m.id} type="button" onClick={() => setOpenId(m.id)}
                 className="w-full grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)_5rem] sm:grid-cols-[13rem_minmax(0,1fr)_6rem] gap-3 items-center text-left group">
                 <span className="text-sm font-semibold truncate group-hover:underline">{m.name}</span>
@@ -151,6 +155,11 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
               </button>
             ))}
             {!bars.length && <p className="text-sm text-mute">None of these models has a {M.l.toLowerCase()} value yet.</p>}
+            {bars.length > BAR_LIMIT && (
+              <button type="button" onClick={() => setAllBars(!allBars)} className="h-10 text-sm font-semibold underline underline-offset-4 decoration-acc decoration-2">
+                {allBars ? `Show top ${BAR_LIMIT}` : `Show all ${bars.length}`}
+              </button>
+            )}
           </div>
         ) : (
           <div className="fade mt-6 rounded-2xl bg-soft p-6">
@@ -180,7 +189,7 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ m, v }, i) => (
+              {(allRows ? rows : rows.slice(0, ROW_LIMIT)).map(({ m, v }, i) => (
                 <tr key={m.id} className="border-t border-line hover:bg-soft">
                   <td className="p-3 num text-mute">{i + 1}</td>
                   <td className="p-3">
@@ -201,6 +210,13 @@ export function Explorer({ models, calibrations, creators, fileCount, runStats, 
               ))}
             </tbody>
           </TableBox>
+          {rows.length > ROW_LIMIT && (
+            <div className="px-3 pt-2">
+              <button type="button" onClick={() => setAllRows(!allRows)} className="h-10 text-sm font-semibold underline underline-offset-4 decoration-acc decoration-2">
+                {allRows ? `Show top ${ROW_LIMIT}` : `Show all ${rows.length} models`}
+              </button>
+            </div>
+          )}
           <p className="text-xs text-mute p-3">Average = each source mapped onto the Artificial Analysis scale, then averaged. Sources that haven&apos;t tested a model are skipped.</p>
         </Card>
       )}
