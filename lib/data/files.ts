@@ -17,8 +17,9 @@ export function toFileRow(r: Row): FileRow {
 export const loadFileCount = cache(async (): Promise<number> => {
   const rows = await withFallback('v_files count', async () => {
     const { supabaseServer } = await import('@/lib/supabase/server');
-    const { count, error } = await supabaseServer().from('files').select('id', { count: 'exact', head: true });
-    if (error) throw new Error(error.message);
+    // anon reads views only (0002_security.sql), so count through v_files
+    const { count, error } = await supabaseServer().from('v_files').select('id', { count: 'exact', head: true });
+    if (error) throw new Error(error.message || `HTTP ${error.code ?? 'error'}`);
     return count ? [count] : [];
   }, () => [SAMPLE_FILES.length], true);
   return rows[0] ?? 0;
