@@ -1,0 +1,26 @@
+# Daily Hugging Face sync (W4): files, sizes, params + KV for every model with hf_repo. See scripts/hf-sync.ts.
+name: hf-sync
+on:
+  schedule:
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+concurrency:
+  group: hf-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/hf-sync.ts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

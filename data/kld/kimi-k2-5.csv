@@ -1,0 +1,4 @@
+repo,quant,kld,eval_set,source,source_ref
+QuantPasture/Kimi-K2.5-GGUF,IQ3_S,0.158551,quantpasture-card,quantpasture,https://huggingface.co/QuantPasture/Kimi-K2.5-GGUF (model card table; KLD vs the Q4_X reference)
+QuantPasture/Kimi-K2.5-GGUF,IQ2_S,0.294937,quantpasture-card,quantpasture,https://huggingface.co/QuantPasture/Kimi-K2.5-GGUF (model card table; KLD vs the Q4_X reference)
+QuantPasture/Kimi-K2.5-GGUF,IQ2_XXS,0.540149,quantpasture-card,quantpasture,https://huggingface.co/QuantPasture/Kimi-K2.5-GGUF (model card table; KLD vs the Q4_X reference)

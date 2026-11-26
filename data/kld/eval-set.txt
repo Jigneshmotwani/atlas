@@ -1,0 +1,16 @@
+Atlas KLD eval text (eval_set = "atlas-v1")
+==========================================
+
+Do not commit a copy of copyrighted text here. scripts/measure-kld.sh builds the eval file locally:
+
+  1. wikitext-2-raw-v1 test split (CC BY-SA 3.0), the de-facto llama.cpp perplexity corpus:
+       https://huggingface.co/datasets/Salesforce/wikitext  (config wikitext-2-raw-v1, split test)
+  2. Concatenate the raw text, keep the first 60 chunks × 2048 tokens (llama-perplexity -c 2048 --chunks 60),
+     which is ~123K tokens and matches what most uploader model cards report.
+
+Every Atlas measurement must use the same file, context (2048), chunk count (60), and a BF16 (or the official
+native-precision) GGUF of the same model as the KL-divergence base. Rows measured this way go into
+data/kld/atlas.csv with eval_set "atlas-v1", source "atlas" and source_ref "<llama.cpp build> <date> DGX Spark".
+
+Numbers copied from uploader model cards keep the uploader's own eval set name (their text and settings differ,
+so they are only compared within the same eval_set on the Quants page).
